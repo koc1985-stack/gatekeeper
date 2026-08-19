@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct StatsView: View {
     @Query(filter: #Predicate<PurchaseItem> { $0.statusRaw == "skipped" })
@@ -26,10 +27,29 @@ struct StatsView: View {
         return Double(skippedItems.count) / Double(total)
     }
 
+    private var shareCardContent: ShareCardView {
+        ShareCardView(saved: totalSaved, hours: totalHoursSaved, currencyCode: currencyCode)
+    }
+
     private var shareImage: Image {
-        let renderer = ImageRenderer(content: ShareCardView(saved: totalSaved, hours: totalHoursSaved, currencyCode: currencyCode))
+        let renderer = ImageRenderer(content: shareCardContent)
         renderer.scale = 3
         return renderer.image ?? Image(systemName: "square.and.arrow.up")
+    }
+
+    /// ShareLink needs a Transferable item; a PNG file URL is the most reliable way to
+    /// share a rendered SwiftUI view (Messages/Photos recognize it as an actual image).
+    private var shareCardFileURL: URL? {
+        let renderer = ImageRenderer(content: shareCardContent)
+        renderer.scale = 3
+        guard let data = renderer.uiImage?.pngData() else { return nil }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("istatistik-karti.png")
+        do {
+            try data.write(to: url)
+            return url
+        } catch {
+            return nil
+        }
     }
 
     var body: some View {
@@ -55,9 +75,9 @@ struct StatsView: View {
                         tint: .orange
                     )
 
-                    if !skippedItems.isEmpty {
+                    if !skippedItems.isEmpty, let shareCardFileURL {
                         ShareLink(
-                            item: shareImage,
+                            item: shareCardFileURL,
                             preview: SharePreview("İstatistiklerim", image: shareImage)
                         ) {
                             Label("Paylaş", systemImage: "square.and.arrow.up")
