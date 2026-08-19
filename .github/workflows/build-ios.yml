@@ -1,0 +1,71 @@
+name: Build iOS IPA (unsigned, for Sideloadly)
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "Sources/**"
+      - "Resources/**"
+      - "project.yml"
+      - ".github/workflows/build-ios.yml"
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Runner'da birden fazla Xcode sürümü kurulu gelir ama varsayılan olarak eski biri
+      # seçilidir. Homebrew'in kurduğu güncel xcodegen, en yeni Xcode'un proje formatını
+      # üretiyor - bu yüzden burada elle en yeni kurulu Xcode'a geçiyoruz, yoksa
+      # "future Xcode project file format" hatası alınır.
+      - name: Select latest available Xcode
+        run: |
+          LATEST_XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Seçilen Xcode: $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build unsigned .app
+        run: |
+          xcodebuild \
+            -project ImpulseGatekeeper.xcodeproj \
+            -scheme ImpulseGatekeeper \
+            -configuration Debug \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package .ipa
+        run: |
+          set -e
+          APP_PATH="build/Build/Products/Debug-iphoneos/Bekle.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "Beklenen .app bulunamadı: $APP_PATH"
+            find build/Build/Products -maxdepth 2
+            exit 1
+          fi
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r ImpulseGatekeeper.ipa Payload
+          echo "IPA_SIZE=$(du -h ImpulseGatekeeper.ipa | cut -f1)" >> "$GITHUB_ENV"
+
+      - name: Upload .ipa artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImpulseGatekeeper-ipa
+          path: ImpulseGatekeeper.ipa
+          retention-days: 14

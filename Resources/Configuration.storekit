@@ -1,0 +1,94 @@
+{
+  "identifier" : "6F000000-0000-0000-0000-000000000001",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "299.99",
+      "familyShareable" : false,
+      "internalID" : "6F000000-0000-0000-0000-000000000002",
+      "localizations" : [
+        {
+          "description" : "Sınırsız istek takibi, özel soğuma süreleri ve gelişmiş istatistikler.",
+          "displayName" : "Ömür Boyu Premium",
+          "locale" : "tr"
+        },
+        {
+          "description" : "Unlimited item tracking, custom cooldown durations and advanced stats.",
+          "displayName" : "Premium Lifetime",
+          "locale" : "en"
+        }
+      ],
+      "productID" : "com.impulsegatekeeper.premium.lifetime",
+      "referenceName" : "Premium Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_disableDialogView" : false
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "6F000000-0000-0000-0000-000000000003",
+      "localizations" : [],
+      "name" : "Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6F000000-0000-0000-0000-000000000004",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Aylık Premium abonelik.",
+              "displayName" : "Premium Aylık",
+              "locale" : "tr"
+            },
+            {
+              "description" : "Monthly Premium subscription.",
+              "displayName" : "Premium Monthly",
+              "locale" : "en"
+            }
+          ],
+          "productID" : "com.impulsegatekeeper.premium.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Premium Monthly",
+          "subscriptionGroupID" : "6F000000-0000-0000-0000-000000000003",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "299.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6F000000-0000-0000-0000-000000000005",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Yıllık Premium abonelik.",
+              "displayName" : "Premium Yıllık",
+              "locale" : "tr"
+            },
+            {
+              "description" : "Yearly Premium subscription.",
+              "displayName" : "Premium Yearly",
+              "locale" : "en"
+            }
+          ],
+          "productID" : "com.impulsegatekeeper.premium.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Premium Yearly",
+          "subscriptionGroupID" : "6F000000-0000-0000-0000-000000000003",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

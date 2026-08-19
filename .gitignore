@@ -1,0 +1,10 @@
+*.ipa
+*.zip
+.claude/
+Payload/
+build/
+Generated/
+*.xcodeproj
+DerivedData/
+xcuserdata/
+.DS_Store
