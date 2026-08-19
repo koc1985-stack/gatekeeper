@@ -101,7 +101,7 @@ struct DecisionView: View {
                 systemImage: item.status == .bought ? "cart.fill" : "checkmark.seal.fill"
             )
             .font(.headline)
-            .foregroundStyle(item.status == .bought ? .secondary : .green)
+            .foregroundStyle(item.status == .bought ? AnyShapeStyle(.secondary) : AnyShapeStyle(.green))
         }
     }
 

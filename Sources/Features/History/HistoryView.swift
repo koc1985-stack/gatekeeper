@@ -68,7 +68,7 @@ private struct HistoryRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: item.status == .bought ? "cart.fill" : "checkmark.seal.fill")
-                .foregroundStyle(item.status == .bought ? .secondary : .green)
+                .foregroundStyle(item.status == .bought ? AnyShapeStyle(.secondary) : AnyShapeStyle(.green))
                 .frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name)
