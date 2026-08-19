@@ -34,7 +34,10 @@ struct StatsView: View {
     private var shareImage: Image {
         let renderer = ImageRenderer(content: shareCardContent)
         renderer.scale = 3
-        return renderer.image ?? Image(systemName: "square.and.arrow.up")
+        if let uiImage = renderer.uiImage {
+            return Image(uiImage: uiImage)
+        }
+        return Image(systemName: "square.and.arrow.up")
     }
 
     /// ShareLink needs a Transferable item; a PNG file URL is the most reliable way to
