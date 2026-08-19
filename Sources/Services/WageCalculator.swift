@@ -21,8 +21,8 @@ enum WageCalculator {
             let minutes = max(1, Int((hours * 60).rounded()))
             return String(localized: "\(minutes) dakika")
         } else if hours < 100 {
-            let rounded = (hours * 10).rounded() / 10
-            return String(localized: "\(rounded, specifier: "%.1f") saat")
+            let roundedText = String(format: "%.1f", (hours * 10).rounded() / 10)
+            return String(localized: "\(roundedText) saat")
         } else {
             let days = Int((hours / 24).rounded())
             return String(localized: "\(days) gün")

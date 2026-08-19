@@ -20,7 +20,7 @@ struct ShareCardView: View {
             Text("biriktirdim")
                 .foregroundStyle(.white.opacity(0.85))
             Divider()
-                .overlay(Color.white.opacity(0.3))
+                .overlay { Color.white.opacity(0.3) }
                 .padding(.horizontal, 40)
             Text("\(WageCalculator.formattedHours(hours)) kazandım")
                 .foregroundStyle(.white.opacity(0.9))

@@ -22,7 +22,7 @@ struct StatCard: View {
             Spacer()
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color(uiColor: .secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
