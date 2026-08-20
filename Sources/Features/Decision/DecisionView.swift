@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import UIKit
+import WidgetKit
 
 struct DecisionView: View {
     @Bindable var item: PurchaseItem
@@ -24,6 +25,15 @@ struct DecisionView: View {
                 }
 
                 VStack(spacing: 8) {
+                    if item.source == .extensionSource, let domain = item.sourceDomain {
+                        Label(domain, systemImage: "safari.fill")
+                            .font(.caption.bold())
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue.opacity(0.12))
+                            .foregroundStyle(.blue)
+                            .clipShape(Capsule())
+                    }
                     Text(item.name)
                         .font(.title.bold())
                         .multilineTextAlignment(.center)
@@ -40,6 +50,21 @@ struct DecisionView: View {
                             .font(.title2.bold())
                         Text(item.isWaiting ? "çalışman gerekiyor" : "çalışman gerekti")
                             .foregroundStyle(.secondary)
+                    }
+                }
+
+                if item.price > 0 {
+                    VStack(spacing: 4) {
+                        Text("Bunun yerine 3 yıl S&P 500'e yatırsaydın")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        Text(CurrencyFormatter.format(
+                            WageCalculator.projectedValue(principal: item.price, years: 3, annualRate: InvestmentAsset.sp500.annualReturnRate),
+                            currencyCode: item.currencyCode
+                        ))
+                        .font(.headline)
+                        .foregroundStyle(.green)
                     }
                 }
 
@@ -109,6 +134,7 @@ struct DecisionView: View {
         item.status = bought ? .bought : .skipped
         item.decidedAt = .now
         NotificationService.shared.cancelReminder(for: item)
+        WidgetCenter.shared.reloadAllTimelines()
         dismiss()
     }
 }

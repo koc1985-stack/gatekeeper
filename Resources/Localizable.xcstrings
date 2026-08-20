@@ -1,6 +1,192 @@
 {
   "sourceLanguage" : "tr",
   "strings" : {
+    "Stresli" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stressed" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Stresli" } }
+      }
+    },
+    "Üzgün" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sad" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Üzgün" } }
+      }
+    },
+    "Sıkılmış" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Bored" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sıkılmış" } }
+      }
+    },
+    "Mutlu" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Happy" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Mutlu" } }
+      }
+    },
+    "S&P 500" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "S&P 500" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "S&P 500" } }
+      }
+    },
+    "Altın" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gold" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Altın" } }
+      }
+    },
+    "15 saniye bekle" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Hold for 15 seconds" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "15 saniye bekle" } }
+      }
+    },
+    "Matematik sorusu" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Math question" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Matematik sorusu" } }
+      }
+    },
+    "Bu parayı yatırsaydın?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "What if you invested this instead?" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Bu parayı yatırsaydın?" } }
+      }
+    },
+    "Geçmiş performans, gelecek için garanti değildir. Uzun vadeli ortalamalara dayalı kaba bir tahmindir." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Past performance is not a guarantee of future results. A rough estimate based on long-run averages." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Geçmiş performans, gelecek için garanti değildir. Uzun vadeli ortalamalara dayalı kaba bir tahmindir." } }
+      }
+    },
+    "Şu an nasıl hissediyorsun?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "How are you feeling right now?" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Şu an nasıl hissediyorsun?" } }
+      }
+    },
+    "Gece Kuşu Kilidi" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Night Owl Shield" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gece Kuşu Kilidi" } }
+      }
+    },
+    "Gece geç saatte alışveriş genelde anlık bir dürtüdür. Devam etmeden önce bir adım daha at." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Late-night shopping is usually an impulse. Take one more step before continuing." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gece geç saatte alışveriş genelde anlık bir dürtüdür. Devam etmeden önce bir adım daha at." } }
+      }
+    },
+    "15 saniye boyunca parmağını bu daireden çekme" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep your finger on this circle for 15 seconds" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "15 saniye boyunca parmağını bu daireden çekme" } }
+      }
+    },
+    "Cevap" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Answer" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Cevap" } }
+      }
+    },
+    "Yanlış cevap, tekrar dene" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Wrong answer, try again" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Yanlış cevap, tekrar dene" } }
+      }
+    },
+    "Vazgeç" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Vazgeç" } }
+      }
+    },
+    "Bunun yerine 3 yıl S&P 500'e yatırsaydın" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "If you invested this in the S&P 500 for 3 years instead" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Bunun yerine 3 yıl S&P 500'e yatırsaydın" } }
+      }
+    },
+    "Hangi ruh halinde vazgeçtin?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Which mood made you skip it?" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Hangi ruh halinde vazgeçtin?" } }
+      }
+    },
+    "Instagram'da Paylaş" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share on Instagram" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Instagram'da Paylaş" } }
+      }
+    },
+    "Belirlediğin gece saatlerinde hem uygulamada hem Safari uzantısında ekstra bir engel gösterilir." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "During the night hours you set, an extra barrier appears in both the app and the Safari extension." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Belirlediğin gece saatlerinde hem uygulamada hem Safari uzantısında ekstra bir engel gösterilir." } }
+      }
+    },
+    "Safari Uzantısını Etkinleştir" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enable the Safari Extension" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Safari Uzantısını Etkinleştir" } }
+      }
+    },
+    "Trendyol, Amazon, Zara ve H&M ödeme sayfalarında otomatik uyarı için gerekir." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Needed for automatic warnings on Trendyol, Amazon, Zara and H&M checkout pages." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Trendyol, Amazon, Zara ve H&M ödeme sayfalarında otomatik uyarı için gerekir." } }
+      }
+    },
+    "Zorluk" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Difficulty" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Zorluk" } }
+      }
+    },
+    "Trendyol, Amazon, Zara ve H&M gibi sitelerde ödeme ekranına geldiğinde otomatik uyarı gösterebilmemiz için uzantıyı Safari'de açman gerekiyor." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "For automatic warnings when you reach checkout on sites like Trendyol, Amazon, Zara and H&M, you need to turn the extension on in Safari." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Trendyol, Amazon, Zara ve H&M gibi sitelerde ödeme ekranına geldiğinde otomatik uyarı gösterebilmemiz için uzantıyı Safari'de açman gerekiyor." } }
+      }
+    },
+    "Aşağıdaki butona bas, Ayarlar uygulaması açılsın" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap the button below to open the Settings app" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Aşağıdaki butona bas, Ayarlar uygulaması açılsın" } }
+      }
+    },
+    "Safari → Uzantılar → \"Bekle\" uzantısını bul" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Safari → Extensions → find the \"Bekle\" extension" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Safari → Uzantılar → \"Bekle\" uzantısını bul" } }
+      }
+    },
+    "Uzantıyı aç ve tüm web siteleri için izin ver" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Turn the extension on and allow it for all websites" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Uzantıyı aç ve tüm web siteleri için izin ver" } }
+      }
+    },
+    "Ayarları Aç" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open Settings" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ayarları Aç" } }
+      }
+    },
+    "Not: Uzantı sadece ödeme sayfasına geldiğinde devreye girer; gezinme geçmişini takip etmez ya da veri toplamaz, tüm veriler sadece cihazında kalır." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Note: the extension only activates on checkout pages; it doesn't track your browsing history or collect data — everything stays on your device." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Not: Uzantı sadece ödeme sayfasına geldiğinde devreye girer; gezinme geçmişini takip etmez ya da veri toplamaz, tüm veriler sadece cihazında kalır." } }
+      }
+    },
+    "Safari Uzantısı" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Safari Extension" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Safari Uzantısı" } }
+      }
+    },
     "24 saat bekle, dürtüyü geçir" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Wait 24 hours, let the urge pass" } },

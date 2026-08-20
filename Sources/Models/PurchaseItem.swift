@@ -7,6 +7,38 @@ enum PurchaseStatus: String, Codable, CaseIterable {
     case skipped
 }
 
+enum Mood: String, Codable, CaseIterable, Identifiable {
+    case stressed
+    case sad
+    case bored
+    case happy
+
+    var id: String { rawValue }
+
+    var displayName: LocalizedStringResource {
+        switch self {
+        case .stressed: return "Stresli"
+        case .sad: return "Üzgün"
+        case .bored: return "Sıkılmış"
+        case .happy: return "Mutlu"
+        }
+    }
+
+    var emoji: String {
+        switch self {
+        case .stressed: return "😣"
+        case .sad: return "😢"
+        case .bored: return "🥱"
+        case .happy: return "😊"
+        }
+    }
+}
+
+enum PurchaseSource: String, Codable, CaseIterable {
+    case manual
+    case extensionSource = "extension"
+}
+
 enum PurchaseCategory: String, Codable, CaseIterable, Identifiable {
     case clothing
     case electronics
@@ -53,6 +85,9 @@ final class PurchaseItem {
     var cooldownEndsAt: Date = Date.now
     var statusRaw: String = PurchaseStatus.waiting.rawValue
     var decidedAt: Date?
+    var moodRaw: String?
+    var sourceRaw: String = PurchaseSource.manual.rawValue
+    var sourceDomain: String?
 
     init(
         name: String,
@@ -61,7 +96,10 @@ final class PurchaseItem {
         note: String = "",
         imageData: Data? = nil,
         category: PurchaseCategory = .other,
-        cooldownHours: Double = 24
+        cooldownHours: Double = 24,
+        mood: Mood? = nil,
+        source: PurchaseSource = .manual,
+        sourceDomain: String? = nil
     ) {
         let now = Date.now
         self.id = UUID()
@@ -75,6 +113,9 @@ final class PurchaseItem {
         self.cooldownEndsAt = now.addingTimeInterval(cooldownHours * 3600)
         self.statusRaw = PurchaseStatus.waiting.rawValue
         self.decidedAt = nil
+        self.moodRaw = mood?.rawValue
+        self.sourceRaw = source.rawValue
+        self.sourceDomain = sourceDomain
     }
 
     var category: PurchaseCategory {
@@ -95,5 +136,15 @@ final class PurchaseItem {
 
     var isCooldownComplete: Bool {
         cooldownEndsAt <= .now
+    }
+
+    var mood: Mood? {
+        get { moodRaw.flatMap { Mood(rawValue: $0) } }
+        set { moodRaw = newValue?.rawValue }
+    }
+
+    var source: PurchaseSource {
+        get { PurchaseSource(rawValue: sourceRaw) ?? .manual }
+        set { sourceRaw = newValue.rawValue }
     }
 }

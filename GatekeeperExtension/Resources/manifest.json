@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Bekle: Alışveriş Freni",
+  "description": "Trendyol, Amazon, Zara ve H&M'de ödeme yapmadan önce bir kez daha düşünmeni sağlar.",
+  "version": "1.0",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "*://*.trendyol.com/*",
+    "*://*.amazon.com.tr/*",
+    "*://*.amazon.com/*",
+    "*://*.zara.com/*",
+    "*://*.hm.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.trendyol.com/*",
+        "*://*.amazon.com.tr/*",
+        "*://*.amazon.com/*",
+        "*://*.zara.com/*",
+        "*://*.hm.com/*"
+      ],
+      "js": ["site-selectors.js", "overlay-styles.js", "content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}

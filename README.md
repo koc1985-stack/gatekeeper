@@ -10,6 +10,7 @@ Bu proje **Windows üzerinde, kod düzeyinde tamamen yazıldı** ama iOS uygulam
 - SwiftData + CloudKit (`.automatic`) — ayrı bir backend/hesap sistemi yok, veriler kullanıcının iCloud hesabıyla otomatik senkronize olur ve yedeklenir
 - StoreKit 2 — Premium abonelik/ömür boyu satın alma, `Configuration.storekit` ile Simulator'da test edilebilir
 - UserNotifications — soğuma süresi bitince yerel bildirim, bildirim üzerinden doğrudan "Aldım"/"Vazgeçtim" aksiyonu
+- Safari Web Extension (MV3) + WidgetKit — App Group üzerinden ana uygulamayla aynı SwiftData deposunu paylaşan iki ek hedef (bkz. "v2" bölümü)
 - Localizable.xcstrings — Türkçe (ana dil) + İngilizce
 
 ## Kurulum (Mac üzerinde, tek seferlik)
@@ -58,25 +59,38 @@ Not: Uygulama SwiftData+CloudKit ve StoreKit kullanıyor — iCloud senkronu ve 
 
 Ücretsiz Apple ID ile imzalanan uygulamalar **7 günde bir** yeniden imzalanmalı; ücretli Developer Program hesabıyla imzalarsan bu süre 1 yıla çıkar. Süre dolarsa Sideloadly'de aynı `.ipa`'yı tekrar sürükleyip tekrar yükleyerek yenileyebilirsin.
 
+## v2: Safari Uzantısı, Widget, Gece Kuşu Kilidi, Duygusal Check-in
+
+Ana uygulamanın yanına iki yeni Xcode hedefi eklendi: **GatekeeperExtension** (Trendyol/Amazon/Zara/H&M ödeme sayfalarında devreye giren Safari Web Extension) ve **GatekeeperWidgetExtension** (ana ekran + kilit ekranı "Bu Ay Kurtarılan ₺" widget'ı). Üçü de aynı SwiftData deposunu **App Group** (`group.com.impulsegatekeeper.app`) üzerinden paylaşıyor — extension'dan eklenen bir ürün doğrudan ana uygulamanın Bekleme Listesi'nde görünür.
+
+**Sideloadly ile test ederken önemli:** App Group'lu (paylaşımlı container gerektiren) uygulamalar `xcodegen generate` sonrası Xcode'da **Signing & Capabilities**'te App Group'un işaretli/oluşturulmuş olmasını ister; Team'i seçtikten sonra Xcode bunu genelde otomatik halleder, ama ilk derlemede bir uyarı görürsen "Ayarlar → Apple ID → App Groups" ile ilgili bir provisioning sorunu olabilir — bana hatayı yapıştır.
+
+**Safari uzantısını etkinleştirme** (uygulama içinde Ayarlar → "Safari Uzantısını Etkinleştir" ile aynı adımlar): Ayarlar → Safari → Uzantılar → "Bekle" → aç → tüm web siteleri için izin ver. Apple bir uygulamanın kendi uzantısını otomatik açmasına izin vermiyor, bu adım her zaman manuel.
+
+**Dürüst bir uyarı — siteler test edilmedi:** `GatekeeperExtension/Resources/site-selectors.js` içindeki Trendyol/Amazon/Zara/H&M CSS seçicileri, gerçek siteleri açıp inceleyemediğim için (bu ortamda Mac/Safari/gerçek alışveriş oturumu yok) en iyi tahminimle yazıldı — siteler düzenini değiştirdikçe bayatlayabilirler. Seçici bir şey bulamazsa özellik **sessizce başarısız olmuyor**: genel ödeme-sayfası URL deseniyle yine devreye girer ve fiyatı elle girmeni ister. Gerçek cihazda hangi sitede ne olduğunu (veya Mac'e bağlayıp Safari Web Inspector konsol çıktısını) paylaşırsan seçicileri düzeltirim — Xcode build hatalarını düzelttiğimiz yöntemin aynısı.
+
+**"Kilit" ne kadar gerçek?** Uzantı, ödeme butonuna tıklamayı yakalayıp üstüne bir uyarı ekranı bindiriyor ve soğuma süresi boyunca sayfaya her dönüşte tekrar beliriyor — ama One Sec/Opal/Freedom gibi uygulamalarla aynı kategoride: bir *caydırma katmanı*, teknik olarak kırılamaz bir kilit değil. Kullanıcı "Yine de devam et" diyerek geçebilir; amaç anlık dürtüyü kesmek.
+
+- **Bildirimler**: Uzantı headless bir işlem olduğu için bildirim izni isteyemiyor — bunun yerine ana uygulama her ön plana geldiğinde (`RootView.reconcileNotifications`) bekleyen tüm ürünler için hatırlatmayı (yeniden) planlıyor; aynı ID ile tekrar planlamak zararsız, tekilleştiriliyor.
+- **Yatırım oranları** (S&P 500 %10, Altın %7 yıllık): kabaca uzun vadeli tarihsel ortalamalar, uygulamada da uzantıda da "garanti değildir" notuyla gösteriliyor.
+
 ## Bilinen eksikler / sıradaki adımlar
 
-- **App Icon**: `Resources/Assets.xcassets/AppIcon.appiconset` şu an boş bir placeholder. 1024×1024 bir görsel ekleyip Xcode'a sürükle-bırak yapman gerekiyor (Nim/ürettiğin başka bir görsel de olur).
-- **İngilizce çeviri**: `Localizable.xcstrings` en görünür ~70 metni (başlıklar, butonlar, ana ekranlar) çevirdi. Saat/dakika gibi dinamik olarak üretilen bazı ifadeler (`WageCalculator.formattedHours`) şu an sadece Türkçe — İngilizce arayüzde de Türkçe görünürler, hata vermezler. Xcode'da dosyayı açıp String Catalog editöründen tamamlayabilirsin.
-- **Çoklu para birimi**: İstatistikler tek bir para biriminde toplanıyor (Ayarlar'daki para birimi); farklı para birimleriyle eklenen ürünler varsa toplam yanıltıcı olur. MVP kapsamında basit tutuldu.
-- Kapsam dışı bırakılanlar: Safari Extension, ana ekran widget'ı, Apple Watch uygulaması, ayrı bir sunucu/API, gerçek analitik.
+- **App Icon** ve **uzantı ikonu**: ikisi de placeholder/boş. 1024×1024 bir görsel + uzantı için küçük ikonlar eklemen gerekiyor.
+- **İngilizce çeviri**: yeni v2 metinlerinin çoğu çevrildi ama gece modu saat metinleri gibi dinamik ifadeler yine sadece Türkçe (hata vermez, sadece İngilizce arayüzde de Türkçe görünür).
+- **Çoklu para birimi**: İstatistikler tek bir para biriminde toplanıyor; farklı para birimleriyle eklenen ürünler varsa toplam yanıltıcı olur.
+- Kapsam dışı: Apple Watch uygulaması, ayrı bir sunucu/API, gerçek analitik/A-B test altyapısı.
 
 ## Proje yapısı
 
 ```
-Sources/
-  App/                  — @main giriş noktası, ModelContainer + CloudKit kurulumu
-  Root/                 — Sekme çubuğu, onboarding kapısı, bildirimden gelen derin bağlantılar
-  Models/               — PurchaseItem, UserSettings (SwiftData)
-  Services/             — NotificationService, StoreService, WageCalculator, CurrencyFormatter
-  Features/
-    Onboarding/          Home/            AddItem/         Decision/
-    History/              Stats/           Settings/         Paywall/
-    Shared/               — FeatureRow, StatCard gibi ortak bileşenler
+Sources/                          — ana uygulama (App Group'lu paylaşımlı SwiftData deposu kullanır)
+  App/, Root/, Models/, Services/, Features/ (Onboarding, Home, AddItem, Decision, History,
+    Stats, Settings, Paywall, Shared — MoodPicker, NightChallengeView dahil)
+GatekeeperExtension/               — Safari Web Extension
+  SafariWebExtensionHandler.swift  — JS ↔ paylaşımlı SwiftData köprüsü
+  Resources/                       — manifest.json, content.js, site-selectors.js, background.js
+GatekeeperWidget/                  — WidgetKit hedefi (ana ekran + kilit ekranı)
 Resources/
   Localizable.xcstrings, Assets.xcassets, Configuration.storekit
 ```

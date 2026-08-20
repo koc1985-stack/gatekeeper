@@ -3,6 +3,7 @@ import SwiftData
 
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var settingsList: [UserSettings]
     @State private var notificationService = NotificationService.shared
     @State private var decisionTarget: DecisionTarget?
@@ -51,6 +52,12 @@ struct RootView: View {
             applyQuickAction(action)
             notificationService.pendingQuickAction = nil
         }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active { reconcileNotifications() }
+        }
+        .task {
+            reconcileNotifications()
+        }
     }
 
     private func applyQuickAction(_ action: QuickAction) {
@@ -59,6 +66,19 @@ struct RootView: View {
         guard let item = try? modelContext.fetch(descriptor).first else { return }
         item.status = action.bought ? .bought : .skipped
         item.decidedAt = .now
+    }
+
+    /// The Safari extension can insert new "waiting" items into the shared store without being
+    /// able to schedule a local notification itself (no reliable permission/UI from a headless
+    /// extension process). Re-scheduling here on every foreground is idempotent — same
+    /// identifier just replaces the pending request — so it also self-heals any item added while
+    /// the app was killed.
+    private func reconcileNotifications() {
+        let descriptor = FetchDescriptor<PurchaseItem>(predicate: #Predicate<PurchaseItem> { $0.statusRaw == "waiting" })
+        guard let waitingItems = try? modelContext.fetch(descriptor) else { return }
+        for item in waitingItems {
+            NotificationService.shared.scheduleReminder(for: item)
+        }
     }
 }
 

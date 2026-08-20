@@ -68,6 +68,53 @@ struct SettingsView: View {
                             }
                         ))
                     }
+
+                    Section {
+                        Toggle("Gece Kuşu Kilidi", isOn: Binding(
+                            get: { settings.nightModeEnabled },
+                            set: { settings.nightModeEnabled = $0 }
+                        ))
+                        if settings.nightModeEnabled {
+                            Stepper(
+                                "Başlangıç: \(settings.nightModeStartHour):00",
+                                value: Binding(
+                                    get: { settings.nightModeStartHour },
+                                    set: { settings.nightModeStartHour = $0 }
+                                ),
+                                in: 0...23
+                            )
+                            Stepper(
+                                "Bitiş: \(settings.nightModeEndHour):00",
+                                value: Binding(
+                                    get: { settings.nightModeEndHour },
+                                    set: { settings.nightModeEndHour = $0 }
+                                ),
+                                in: 0...23
+                            )
+                            Picker("Zorluk", selection: Binding(
+                                get: { settings.nightChallenge },
+                                set: { settings.nightChallenge = $0 }
+                            )) {
+                                ForEach(NightChallenge.allCases) { challenge in
+                                    Text(challenge.displayName).tag(challenge)
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Gece Kuşu Kilidi")
+                    } footer: {
+                        Text("Belirlediğin gece saatlerinde hem uygulamada hem Safari uzantısında ekstra bir engel gösterilir.")
+                    }
+
+                    Section {
+                        NavigationLink {
+                            ExtensionSetupView()
+                        } label: {
+                            Label("Safari Uzantısını Etkinleştir", systemImage: "safari.fill")
+                        }
+                    } footer: {
+                        Text("Trendyol, Amazon, Zara ve H&M ödeme sayfalarında otomatik uyarı için gerekir.")
+                    }
                 }
 
                 Section("Premium") {

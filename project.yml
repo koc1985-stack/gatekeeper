@@ -32,6 +32,8 @@ targets:
           - UIInterfaceOrientationPortrait
         UIBackgroundModes:
           - remote-notification
+        LSApplicationQueriesSchemes:
+          - instagram-stories
         ITSAppUsesNonExemptEncryption: false
     entitlements:
       path: ImpulseGatekeeper.entitlements
@@ -41,6 +43,8 @@ targets:
         com.apple.developer.icloud-services:
           - CloudKit
         aps-environment: development
+        com.apple.security.application-groups:
+          - group.com.impulsegatekeeper.app
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.impulsegatekeeper.app
@@ -48,11 +52,74 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - target: GatekeeperExtension
+        embed: true
+      - target: GatekeeperWidgetExtension
+        embed: true
+
+  GatekeeperExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: GatekeeperExtension/SafariWebExtensionHandler.swift
+      - path: Sources/Models
+      - path: Sources/Services/SharedModelContainer.swift
+      - path: Sources/Services/WageCalculator.swift
+      - path: Sources/Services/CurrencyFormatter.swift
+    resources:
+      - path: GatekeeperExtension/Resources
+    info:
+      path: Generated/GatekeeperExtension-Info.plist
+      properties:
+        CFBundleDisplayName: "Bekle"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.Safari.web-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
+    entitlements:
+      path: GatekeeperExtension/GatekeeperExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.impulsegatekeeper.app
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.impulsegatekeeper.app.extension
+        TARGETED_DEVICE_FAMILY: "1"
+
+  GatekeeperWidgetExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: GatekeeperWidget
+      - path: Sources/Models
+      - path: Sources/Services/SharedModelContainer.swift
+      - path: Sources/Services/WageCalculator.swift
+      - path: Sources/Services/CurrencyFormatter.swift
+    info:
+      path: Generated/GatekeeperWidgetExtension-Info.plist
+      properties:
+        CFBundleDisplayName: "Bekle Widget"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: GatekeeperWidget/GatekeeperWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.impulsegatekeeper.app
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.impulsegatekeeper.app.widget
+        TARGETED_DEVICE_FAMILY: "1"
+
 schemes:
   ImpulseGatekeeper:
     build:
       targets:
         ImpulseGatekeeper: all
+        GatekeeperExtension: all
+        GatekeeperWidgetExtension: all
     run:
       config: Debug
       storeKitConfiguration: Resources/Configuration.storekit

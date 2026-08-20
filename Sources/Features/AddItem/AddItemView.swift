@@ -17,11 +17,14 @@ struct AddItemView: View {
     @State private var cooldownHours: Double = 24
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var imageData: Data?
+    @State private var mood: Mood?
+    @State private var showingNightChallenge = false
 
     private var settings: UserSettings? { settingsList.first }
     private var price: Double { Double(priceText.replacingOccurrences(of: ",", with: ".")) ?? 0 }
     private var hourlyWage: Double { settings?.effectiveHourlyWage ?? 0 }
     private var hoursRequired: Double { WageCalculator.hoursRequired(price: price, hourlyWage: hourlyWage) }
+    private var isNightRightNow: Bool { settings?.isCurrentlyNight() ?? false }
 
     var body: some View {
         NavigationStack {
@@ -92,6 +95,22 @@ struct AddItemView: View {
                         }
                     }
                 }
+
+                if price > 0 {
+                    Section("Bu parayı yatırsaydın?") {
+                        OpportunityCostRow(price: price, currencyCode: currencyCode, asset: .sp500)
+                        OpportunityCostRow(price: price, currencyCode: currencyCode, asset: .gold)
+                        Text("Geçmiş performans, gelecek için garanti değildir. Uzun vadeli ortalamalara dayalı kaba bir tahmindir.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section("Şu an nasıl hissediyorsun?") {
+                    MoodPicker(selection: $mood)
+                        .listRowInsets(EdgeInsets())
+                        .padding()
+                }
             }
             .navigationTitle("Yeni İstek")
             .toolbar {
@@ -99,7 +118,7 @@ struct AddItemView: View {
                     Button("İptal") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Ekle") { save() }
+                    Button("Ekle") { attemptSave() }
                         .disabled(name.isEmpty || price <= 0)
                 }
             }
@@ -114,6 +133,21 @@ struct AddItemView: View {
                 currencyCode = settings?.currencyCode ?? "TRY"
                 cooldownHours = settings?.defaultCooldownHours ?? 24
             }
+            .fullScreenCover(isPresented: $showingNightChallenge) {
+                NightChallengeView(
+                    challenge: settings?.nightChallenge ?? .hold,
+                    onPassed: { save() },
+                    onCancel: {}
+                )
+            }
+        }
+    }
+
+    private func attemptSave() {
+        if isNightRightNow {
+            showingNightChallenge = true
+        } else {
+            save()
         }
     }
 
@@ -125,10 +159,34 @@ struct AddItemView: View {
             note: note,
             imageData: imageData,
             category: category,
-            cooldownHours: cooldownHours
+            cooldownHours: cooldownHours,
+            mood: mood,
+            source: .manual
         )
         modelContext.insert(item)
         NotificationService.shared.scheduleReminder(for: item)
         dismiss()
+    }
+}
+
+private struct OpportunityCostRow: View {
+    let price: Double
+    let currencyCode: String
+    let asset: InvestmentAsset
+    private let years: Double = 3
+
+    private var projected: Double {
+        WageCalculator.projectedValue(principal: price, years: years, annualRate: asset.annualReturnRate)
+    }
+
+    var body: some View {
+        HStack {
+            Text(asset.displayName)
+                .font(.subheadline)
+            Spacer()
+            Text("3 yılda \(CurrencyFormatter.format(projected, currencyCode: currencyCode))")
+                .font(.subheadline.bold())
+                .foregroundStyle(.green)
+        }
     }
 }
