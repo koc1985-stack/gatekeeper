@@ -55,8 +55,11 @@ targets:
     dependencies:
       - target: GatekeeperExtension
         embed: true
-      - target: GatekeeperWidgetExtension
-        embed: true
+      # GatekeeperWidgetExtension temporarily not embedded: a sideloaded install crashed with a
+      # CODESIGNING/"Invalid Page" kernel-level signature rejection specifically in this
+      # extension's process, which likely also blocked the main app from launching at all (iOS
+      # validates every embedded binary's signature before the host app runs). Re-enable once the
+      # signing/provisioning issue for this target is sorted out — see README "Bilinen sorunlar".
 
   GatekeeperExtension:
     type: app-extension

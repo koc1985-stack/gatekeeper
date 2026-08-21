@@ -74,6 +74,10 @@ Ana uygulamanın yanına iki yeni Xcode hedefi eklendi: **GatekeeperExtension** 
 - **Bildirimler**: Uzantı headless bir işlem olduğu için bildirim izni isteyemiyor — bunun yerine ana uygulama her ön plana geldiğinde (`RootView.reconcileNotifications`) bekleyen tüm ürünler için hatırlatmayı (yeniden) planlıyor; aynı ID ile tekrar planlamak zararsız, tekilleştiriliyor.
 - **Yatırım oranları** (S&P 500 %10, Altın %7 yıllık): kabaca uzun vadeli tarihsel ortalamalar, uygulamada da uzantıda da "garanti değildir" notuyla gösteriliyor.
 
+## Bilinen sorunlar
+
+- **Widget şu an pakete gömülü değil.** İlk Sideloadly kurulumunda `GatekeeperWidgetExtension` süreci `CODESIGNING` / "Invalid Page" hatasıyla (kernel'in imzayı geçersiz sayıp anında öldürmesi) çöktü ve bu muhtemelen ana uygulamanın hiç açılmamasına neden oldu — iOS, ana uygulamayı çalıştırmadan önce içindeki tüm gömülü uzantıların imzasını da doğruluyor. Bu bir Swift hatası değil, Sideloadly'nin App Group'lu bir widget uzantısını yeniden imzalarken yaşadığı bir provisioning sorunu gibi görünüyor. Widget'ı `project.yml`'de geçici olarak `dependencies`'ten çıkardım (kod hâlâ orada, sadece pakete gömülmüyor) — Safari uzantısı gömülü kaldı, aynı sorunu yaşayıp yaşamadığını bu şekilde ayrı test edebiliriz. Widget'ı geri istediğinde: `project.yml`'de `GatekeeperWidgetExtension` satırındaki yorumu kaldır, `xcodegen generate` çalıştır.
+
 ## Bilinen eksikler / sıradaki adımlar
 
 - **App Icon** ve **uzantı ikonu**: ikisi de placeholder/boş. 1024×1024 bir görsel + uzantı için küçük ikonlar eklemen gerekiyor.
