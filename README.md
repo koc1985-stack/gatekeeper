@@ -76,7 +76,7 @@ Ana uygulamanın yanına iki yeni Xcode hedefi eklendi: **GatekeeperExtension** 
 
 ## Bilinen sorunlar
 
-- **Widget şu an pakete gömülü değil.** İlk Sideloadly kurulumunda `GatekeeperWidgetExtension` süreci `CODESIGNING` / "Invalid Page" hatasıyla (kernel'in imzayı geçersiz sayıp anında öldürmesi) çöktü ve bu muhtemelen ana uygulamanın hiç açılmamasına neden oldu — iOS, ana uygulamayı çalıştırmadan önce içindeki tüm gömülü uzantıların imzasını da doğruluyor. Bu bir Swift hatası değil, Sideloadly'nin App Group'lu bir widget uzantısını yeniden imzalarken yaşadığı bir provisioning sorunu gibi görünüyor. Widget'ı `project.yml`'de geçici olarak `dependencies`'ten çıkardım (kod hâlâ orada, sadece pakete gömülmüyor) — Safari uzantısı gömülü kaldı, aynı sorunu yaşayıp yaşamadığını bu şekilde ayrı test edebiliriz. Widget'ı geri istediğinde: `project.yml`'de `GatekeeperWidgetExtension` satırındaki yorumu kaldır, `xcodegen generate` çalıştır.
+- **Widget imza geçmişi.** İlk Sideloadly kurulumunda `GatekeeperWidgetExtension` süreci `CODESIGNING` / "Invalid Page" hatasıyla çöktü ve muhtemelen bu yüzden ana uygulama da hiç açılmadı. Ayrıca ayrı olarak, Sideloadly bir `.ipa`'yı var olan kuruluma "upgrade" olarak yazmaya çalışırken entitlement uyuşmazlığı yaşayıp kurulumu reddedebiliyor (`MismatchedApplicationIdentifierEntitlement`). İkinci sorun, ilk widget çökmesinin de gerçek sebebi olabilir — çözüm ikisinde de aynı: **her yeni build'i kurmadan önce eski "Bekle" uygulamasını telefondan tamamen sil, üstüne yazma (upgrade) yapma.** Widget şu an tekrar pakete gömülü; temiz kurulumla sorun çözülmezse tekrar geçici olarak çıkarılabilir (`project.yml` → `ImpulseGatekeeper` hedefinin `dependencies` listesi).
 
 ## Bilinen eksikler / sıradaki adımlar
 
