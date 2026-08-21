@@ -57,6 +57,8 @@ targets:
         embed: true
       - target: GatekeeperWidgetExtension
         embed: true
+      - target: GatekeeperShareExtension
+        embed: true
 
   GatekeeperExtension:
     type: app-extension
@@ -113,6 +115,38 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.impulsegatekeeper.app.widget
         TARGETED_DEVICE_FAMILY: "1"
 
+  GatekeeperShareExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: GatekeeperShareExtension
+      - path: Sources/Models
+      - path: Sources/Services/SharedModelContainer.swift
+      - path: Sources/Services/WageCalculator.swift
+      - path: Sources/Services/CurrencyFormatter.swift
+      - path: Sources/Features/Shared/MoodPicker.swift
+    info:
+      path: Generated/GatekeeperShareExtension-Info.plist
+      properties:
+        CFBundleDisplayName: "Bekle'ye Ekle"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionActivationRule:
+            NSExtensionActivationSupportsWebPageWithMaxCount: 1
+            NSExtensionActivationSupportsWebURLWithMaxCount: 1
+            NSExtensionActivationSupportsText: true
+    entitlements:
+      path: GatekeeperShareExtension/GatekeeperShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.impulsegatekeeper.app
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.impulsegatekeeper.app.share
+        TARGETED_DEVICE_FAMILY: "1"
+
 schemes:
   ImpulseGatekeeper:
     build:
@@ -120,6 +154,7 @@ schemes:
         ImpulseGatekeeper: all
         GatekeeperExtension: all
         GatekeeperWidgetExtension: all
+        GatekeeperShareExtension: all
     run:
       config: Debug
       storeKitConfiguration: Resources/Configuration.storekit
