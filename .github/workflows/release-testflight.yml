@@ -46,6 +46,19 @@ jobs:
           mkdir -p "$HOME/private_keys"
           printf '%s' "$ASC_API_KEY_P8" > "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8"
 
+      # Without a dedicated, unlocked, writable keychain, automatic signing can create a new
+      # certificate via the API but has nowhere reliable to store the matching private key —
+      # it silently fails to persist it, so the very next signing check reports "already has a
+      # certificate for this machine, but its private key is not installed" even within the same
+      # run. This is the standard fix used by every iOS CI pipeline (fastlane match, etc).
+      - name: Set up temporary keychain
+        run: |
+          security create-keychain -p "" build.keychain
+          security list-keychains -d user -s build.keychain login.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+
       # -allowProvisioningUpdates is the whole point here: with a real App Store Connect API
       # key, xcodebuild does exactly what interactive Xcode's automatic signing does — creates/
       # updates the App IDs, the App Group, and the provisioning profiles for the main app AND
