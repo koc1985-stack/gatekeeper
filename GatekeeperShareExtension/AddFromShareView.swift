@@ -10,6 +10,12 @@ struct AddFromShareView: View {
     @State private var priceText = ""
     @State private var currencyCode = "TRY"
     @State private var mood: Mood?
+    @State private var isNeed: Bool?
+    @State private var alreadyOwnsSimilar: Bool?
+    @State private var trigger: PurchaseTrigger?
+    @State private var isFetchingProductInfo = false
+    @State private var monthlyIncome: Double = 0
+    @State private var imageData: Data?
 
     init(initialName: String, sourceURL: String?, onSave: @escaping () -> Void, onCancel: @escaping () -> Void) {
         self.sourceURL = sourceURL
@@ -24,6 +30,11 @@ struct AddFromShareView: View {
         NavigationStack {
             Form {
                 Section("Ürün") {
+                    if isFetchingProductInfo {
+                        Label("Ürün bilgileri getiriliyor…", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     TextField("Ürün adı", text: $name)
                     TextField("Fiyat", text: $priceText)
                         .keyboardType(.decimalPad)
@@ -33,6 +44,15 @@ struct AddFromShareView: View {
                         }
                     }
                 }
+
+                ReflectionSection(
+                    isNeed: $isNeed,
+                    alreadyOwnsSimilar: $alreadyOwnsSimilar,
+                    trigger: $trigger,
+                    price: price,
+                    monthlyIncome: monthlyIncome
+                )
+
                 Section("Şu an nasıl hissediyorsun?") {
                     MoodPicker(selection: $mood)
                         .listRowInsets(EdgeInsets())
@@ -51,7 +71,35 @@ struct AddFromShareView: View {
             }
             .onAppear {
                 let settings = (try? ModelContext(SharedModelContainer.make()).fetch(FetchDescriptor<UserSettings>()))?.first
-                if let settings { currencyCode = settings.currencyCode }
+                if let settings {
+                    currencyCode = settings.currencyCode
+                    monthlyIncome = settings.effectiveMonthlyIncome
+                }
+                fetchProductInfoIfPossible()
+            }
+        }
+    }
+
+    private func fetchProductInfoIfPossible() {
+        guard let sourceURL, let url = URL(string: sourceURL) else { return }
+        isFetchingProductInfo = true
+        Task {
+            let info = await ProductLinkFetcher.fetch(from: url)
+            await MainActor.run {
+                isFetchingProductInfo = false
+                guard let info else { return }
+                if let fetchedName = info.name, !fetchedName.isEmpty {
+                    name = fetchedName
+                }
+                if let fetchedPrice = info.price, fetchedPrice > 0 {
+                    priceText = String(fetchedPrice)
+                }
+                if let fetchedCurrency = info.currencyCode, AppCurrency(rawValue: fetchedCurrency) != nil {
+                    currencyCode = fetchedCurrency
+                }
+            }
+            if let imageURL = info?.imageURL, let (data, _) = try? await URLSession.shared.data(from: imageURL) {
+                await MainActor.run { imageData = data }
             }
         }
     }
@@ -63,11 +111,15 @@ struct AddFromShareView: View {
             name: name,
             price: price,
             currencyCode: currencyCode,
+            imageData: imageData,
             category: .other,
             cooldownHours: settings?.defaultCooldownHours ?? 24,
             mood: mood,
             source: .extensionSource,
-            sourceDomain: sourceURL.flatMap { URL(string: $0)?.host }
+            sourceDomain: sourceURL.flatMap { URL(string: $0)?.host },
+            isNeed: isNeed,
+            alreadyOwnsSimilar: alreadyOwnsSimilar,
+            trigger: trigger
         )
         context.insert(item)
         try? context.save()

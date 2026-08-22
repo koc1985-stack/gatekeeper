@@ -164,6 +164,29 @@
                </div>`
             : ""
         }
+        <div class="bekle-reflect">
+          <p class="bekle-reflect-title">Bir düşün</p>
+          <p class="bekle-reflect-label">İhtiyaç mı, istek mi?</p>
+          <div class="bekle-choice-row" data-group="need">
+            <button class="bekle-choice" data-value="true">İhtiyaç</button>
+            <button class="bekle-choice" data-value="false">İstek</button>
+          </div>
+          <p class="bekle-reflect-label">Zaten benzer bir şeyin var mı?</p>
+          <div class="bekle-choice-row" data-group="owns">
+            <button class="bekle-choice" data-value="true">Var</button>
+            <button class="bekle-choice" data-value="false">Yok</button>
+          </div>
+          <p class="bekle-reflect-label">Bunu nereden gördün?</p>
+          <select class="bekle-select" id="bekle-trigger-select">
+            <option value="">Seçilmedi</option>
+            <option value="ad">Sosyal medya reklamı</option>
+            <option value="friend">Arkadaş önerisi</option>
+            <option value="store">Mağazada/vitrinde gördüm</option>
+            <option value="browsing">Sıkılıp gezerken denk geldim</option>
+            <option value="other">Diğer</option>
+          </select>
+          <div id="bekle-insight" class="bekle-insight"></div>
+        </div>
         <p class="bekle-mood-label">Şu an nasıl hissediyorsun?</p>
         <div class="bekle-mood-row">
           <button class="bekle-mood" data-mood="stressed">😣 Stresli</button>
@@ -181,6 +204,9 @@
   function wireEvents(state) {
     if (!shadowRoot) return;
     let selectedMood = null;
+    let selectedIsNeed = null;
+    let selectedOwns = null;
+    let selectedTrigger = null;
 
     shadowRoot.querySelectorAll(".bekle-mood").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -189,6 +215,56 @@
         btn.classList.add("bekle-mood-selected");
       });
     });
+
+    function updateInsight() {
+      const insightEl = shadowRoot.querySelector("#bekle-insight");
+      if (!insightEl) return;
+      const lines = [];
+      if (selectedIsNeed === false) lines.push("Bunu \"istek\" olarak işaretledin, ihtiyaç değil.");
+      if (selectedOwns === true) lines.push("Zaten benzer bir şeyin olduğunu söyledin.");
+      const monthlyIncome = state.wageInfo?.ok ? state.wageInfo.monthlyIncome : 0;
+      if (monthlyIncome > 0 && state.price > 0) {
+        const percent = (state.price / monthlyIncome) * 100;
+        if (percent >= 5) lines.push(`Bu, aylık gelirinin yaklaşık %${Math.round(percent)}'i.`);
+      }
+      if (selectedTrigger === "ad" || selectedTrigger === "browsing") {
+        lines.push("Bunu bir reklamda ya da sıkılıp gezinirken görmüşsün — bu genelde dürtüsel bir tetikleyicidir.");
+      }
+      if (lines.length === 0) {
+        insightEl.innerHTML = "";
+        return;
+      }
+      const verdict = lines.length > 1 ? "⚠️ Yüksek dürtü riski" : "💡 Bir kez daha düşün";
+      insightEl.innerHTML =
+        `<p class="bekle-insight-verdict">${verdict}</p>` +
+        lines.map((line) => `<p class="bekle-insight-line">• ${line}</p>`).join("");
+    }
+
+    shadowRoot.querySelectorAll('.bekle-choice-row[data-group="need"] .bekle-choice').forEach((btn) => {
+      btn.addEventListener("click", () => {
+        selectedIsNeed = btn.dataset.value === "true";
+        shadowRoot.querySelectorAll('.bekle-choice-row[data-group="need"] .bekle-choice').forEach((b) => b.classList.remove("bekle-choice-selected"));
+        btn.classList.add("bekle-choice-selected");
+        updateInsight();
+      });
+    });
+
+    shadowRoot.querySelectorAll('.bekle-choice-row[data-group="owns"] .bekle-choice').forEach((btn) => {
+      btn.addEventListener("click", () => {
+        selectedOwns = btn.dataset.value === "true";
+        shadowRoot.querySelectorAll('.bekle-choice-row[data-group="owns"] .bekle-choice').forEach((b) => b.classList.remove("bekle-choice-selected"));
+        btn.classList.add("bekle-choice-selected");
+        updateInsight();
+      });
+    });
+
+    const triggerSelect = shadowRoot.querySelector("#bekle-trigger-select");
+    if (triggerSelect) {
+      triggerSelect.addEventListener("change", () => {
+        selectedTrigger = triggerSelect.value || null;
+        updateInsight();
+      });
+    }
 
     const dismissBtn = shadowRoot.querySelector('[data-action="dismiss"]');
     if (dismissBtn) dismissBtn.addEventListener("click", removeOverlay);
@@ -216,7 +292,10 @@
             name: state.name,
             price,
             currencyCode: state.wageInfo?.ok ? state.wageInfo.currencyCode : "TRY",
-            domain: hostname
+            domain: hostname,
+            isNeed: selectedIsNeed,
+            alreadyOwnsSimilar: selectedOwns,
+            trigger: selectedTrigger
           }
         });
 

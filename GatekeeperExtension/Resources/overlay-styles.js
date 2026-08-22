@@ -87,6 +87,63 @@ const BEKLE_OVERLAY_CSS = `
     font-size: 14px;
     padding: 2px 0;
   }
+  .bekle-reflect {
+    background: #fdf6ec;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .bekle-reflect-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #a3690f;
+    margin: 0 0 10px;
+  }
+  .bekle-reflect-label {
+    font-size: 12px;
+    color: #555;
+    margin: 10px 0 6px;
+  }
+  .bekle-choice-row {
+    display: flex;
+    gap: 6px;
+  }
+  .bekle-choice {
+    flex: 1;
+    font-size: 12px;
+    padding: 8px 4px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    background: #fff;
+    cursor: pointer;
+  }
+  .bekle-choice-selected {
+    background: #fff1e8;
+    border-color: #ff6b35;
+  }
+  .bekle-select {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 4px;
+    padding: 8px;
+    font-size: 13px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    background: #fff;
+  }
+  .bekle-insight {
+    margin-top: 10px;
+  }
+  .bekle-insight-verdict {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .bekle-insight-line {
+    font-size: 11px;
+    color: #666;
+    margin: 2px 0;
+  }
   .bekle-mood-label {
     font-size: 13px;
     color: #555;

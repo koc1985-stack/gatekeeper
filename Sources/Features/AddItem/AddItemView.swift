@@ -20,6 +20,11 @@ struct AddItemView: View {
     @State private var mood: Mood?
     @State private var showingNightChallenge = false
     @State private var productLink = ""
+    @State private var isFetchingProductInfo = false
+    @State private var autoFetchFailed = false
+    @State private var isNeed: Bool?
+    @State private var alreadyOwnsSimilar: Bool?
+    @State private var trigger: PurchaseTrigger?
 
     private var settings: UserSettings? { settingsList.first }
     private var price: Double { Double(priceText.replacingOccurrences(of: ",", with: ".")) ?? 0 }
@@ -30,18 +35,41 @@ struct AddItemView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Ürün Linki") {
+                Section {
                     HStack {
                         TextField("Ürünün linkini buraya yapıştır (opsiyonel)", text: $productLink)
                             .keyboardType(.URL)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .onSubmit { fetchProductInfo() }
                         PasteButton(payloadType: URL.self) { urls in
                             guard let url = urls.first else { return }
                             productLink = url.absoluteString
+                            fetchProductInfo()
                         }
                         .labelStyle(.iconOnly)
                     }
+                    if isFetchingProductInfo {
+                        Label("Ürün bilgileri getiriliyor…", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else if !productLink.isEmpty {
+                        Button {
+                            fetchProductInfo()
+                        } label: {
+                            Label("Bilgileri Getir", systemImage: "sparkles")
+                        }
+                        .font(.caption)
+                        if autoFetchFailed {
+                            Text("Otomatik bulunamadı — adı ve fiyatı elle girebilirsin.")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("Ürün Linki")
+                } footer: {
+                    Text("Linki yapıştırınca ürün adını, fiyatını ve görselini otomatik bulmaya çalışırız — her site desteklemeyebilir.")
                 }
 
                 Section("Ürün") {
@@ -121,6 +149,14 @@ struct AddItemView: View {
                     }
                 }
 
+                ReflectionSection(
+                    isNeed: $isNeed,
+                    alreadyOwnsSimilar: $alreadyOwnsSimilar,
+                    trigger: $trigger,
+                    price: price,
+                    monthlyIncome: settings?.effectiveMonthlyIncome ?? 0
+                )
+
                 Section("Şu an nasıl hissediyorsun?") {
                     MoodPicker(selection: $mood)
                         .listRowInsets(EdgeInsets())
@@ -162,6 +198,37 @@ struct AddItemView: View {
         }
     }
 
+    private func fetchProductInfo() {
+        guard let url = URL(string: productLink), url.scheme?.hasPrefix("http") == true else { return }
+        isFetchingProductInfo = true
+        autoFetchFailed = false
+        Task {
+            let info = await ProductLinkFetcher.fetch(from: url)
+            await MainActor.run {
+                isFetchingProductInfo = false
+                guard let info else {
+                    autoFetchFailed = true
+                    return
+                }
+                if let fetchedName = info.name, !fetchedName.isEmpty {
+                    name = fetchedName
+                }
+                if let fetchedPrice = info.price, fetchedPrice > 0 {
+                    priceText = String(fetchedPrice)
+                }
+                if let fetchedCurrency = info.currencyCode, AppCurrency(rawValue: fetchedCurrency) != nil {
+                    currencyCode = fetchedCurrency
+                }
+                autoFetchFailed = (info.name == nil && info.price == nil)
+            }
+            if let imageURL = info?.imageURL, imageData == nil {
+                if let (data, _) = try? await URLSession.shared.data(from: imageURL) {
+                    await MainActor.run { imageData = data }
+                }
+            }
+        }
+    }
+
     private func attemptSave() {
         if isNightRightNow {
             showingNightChallenge = true
@@ -185,7 +252,10 @@ struct AddItemView: View {
             cooldownHours: cooldownHours,
             mood: mood,
             source: .manual,
-            sourceDomain: URL(string: productLink)?.host
+            sourceDomain: URL(string: productLink)?.host,
+            isNeed: isNeed,
+            alreadyOwnsSimilar: alreadyOwnsSimilar,
+            trigger: trigger
         )
         modelContext.insert(item)
         NotificationService.shared.scheduleReminder(for: item)

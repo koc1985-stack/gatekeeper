@@ -125,7 +125,9 @@ targets:
       - path: Sources/Services/SharedModelContainer.swift
       - path: Sources/Services/WageCalculator.swift
       - path: Sources/Services/CurrencyFormatter.swift
+      - path: Sources/Services/ProductLinkFetcher.swift
       - path: Sources/Features/Shared/MoodPicker.swift
+      - path: Sources/Features/Shared/ReflectionSection.swift
     info:
       path: Generated/GatekeeperShareExtension-Info.plist
       properties:

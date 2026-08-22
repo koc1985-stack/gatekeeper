@@ -1,6 +1,126 @@
 {
   "sourceLanguage" : "tr",
   "strings" : {
+    "İhtiyaç mı, istek mi?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Need or want?" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "İhtiyaç mı, istek mi?" } }
+      }
+    },
+    "Seçilmedi" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Not selected" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Seçilmedi" } }
+      }
+    },
+    "İhtiyaç" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Need" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "İhtiyaç" } }
+      }
+    },
+    "İstek" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Want" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "İstek" } }
+      }
+    },
+    "Zaten benzer bir şeyin var mı?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Do you already own something similar?" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Zaten benzer bir şeyin var mı?" } }
+      }
+    },
+    "Bunu nereden gördün?" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Where did you see this?" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Bunu nereden gördün?" } }
+      }
+    },
+    "Bir Düşün" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Think It Over" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Bir Düşün" } }
+      }
+    },
+    "Bu sorular seni yargılamak için değil, anlık kararını bir kez daha gözden geçirmen için." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "These questions aren't meant to judge you — just to help you double-check the moment." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Bu sorular seni yargılamak için değil, anlık kararını bir kez daha gözden geçirmen için." } }
+      }
+    },
+    "Muhtemelen bilinçli bir karar" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Probably a considered decision" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Muhtemelen bilinçli bir karar" } }
+      }
+    },
+    "Bir kez daha düşün" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Think it over once more" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Bir kez daha düşün" } }
+      }
+    },
+    "Yüksek dürtü riski" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "High impulse risk" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Yüksek dürtü riski" } }
+      }
+    },
+    "Sosyal medya reklamı" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A social media ad" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sosyal medya reklamı" } }
+      }
+    },
+    "Arkadaş önerisi" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "A friend's recommendation" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Arkadaş önerisi" } }
+      }
+    },
+    "Mağazada/vitrinde gördüm" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saw it in a store/window" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Mağazada/vitrinde gördüm" } }
+      }
+    },
+    "Sıkılıp gezerken denk geldim" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stumbled on it while bored-browsing" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sıkılıp gezerken denk geldim" } }
+      }
+    },
+    "Bilgileri Getir" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fetch Details" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Bilgileri Getir" } }
+      }
+    },
+    "Ürün bilgileri getiriliyor…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fetching product details…" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ürün bilgileri getiriliyor…" } }
+      }
+    },
+    "Otomatik bulunamadı — adı ve fiyatı elle girebilirsin." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't auto-detect it — you can enter the name and price manually." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Otomatik bulunamadı — adı ve fiyatı elle girebilirsin." } }
+      }
+    },
+    "Linki yapıştırınca ürün adını, fiyatını ve görselini otomatik bulmaya çalışırız — her site desteklemeyebilir." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Once you paste the link, we try to auto-detect the name, price and image — not every site is supported." } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Linki yapıştırınca ürün adını, fiyatını ve görselini otomatik bulmaya çalışırız — her site desteklemeyebilir." } }
+      }
+    },
+    "Ürün adı" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Product name" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ürün adı" } }
+      }
+    },
     "Ürün Linki" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Product Link" } },

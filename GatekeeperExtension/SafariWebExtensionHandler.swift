@@ -31,6 +31,7 @@ final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             complete(context: context, response: [
                 "ok": true,
                 "hourlyWage": settings.effectiveHourlyWage,
+                "monthlyIncome": settings.effectiveMonthlyIncome,
                 "currencyCode": settings.currencyCode
             ])
 
@@ -73,9 +74,16 @@ final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             predicate: #Predicate { $0.statusRaw == "waiting" && $0.name == targetName }
         )).first
 
+        let isNeed = payload["isNeed"] as? Bool
+        let alreadyOwnsSimilar = payload["alreadyOwnsSimilar"] as? Bool
+        let trigger = (payload["trigger"] as? String).flatMap { PurchaseTrigger(rawValue: $0) }
+
         let target: PurchaseItem
         if let existing {
             target = existing
+            target.isNeed = isNeed
+            target.alreadyOwnsSimilar = alreadyOwnsSimilar
+            target.trigger = trigger
         } else {
             let newItem = PurchaseItem(
                 name: name,
@@ -84,7 +92,10 @@ final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 category: .other,
                 cooldownHours: settings.defaultCooldownHours,
                 source: .extensionSource,
-                sourceDomain: domain
+                sourceDomain: domain,
+                isNeed: isNeed,
+                alreadyOwnsSimilar: alreadyOwnsSimilar,
+                trigger: trigger
             )
             modelContext.insert(newItem)
             target = newItem

@@ -39,6 +39,27 @@ enum PurchaseSource: String, Codable, CaseIterable {
     case extensionSource = "extension"
 }
 
+/// What actually put this item in front of the user — the "çevresel faktör" question.
+enum PurchaseTrigger: String, Codable, CaseIterable, Identifiable {
+    case ad
+    case friend
+    case store
+    case browsing
+    case other
+
+    var id: String { rawValue }
+
+    var displayName: LocalizedStringResource {
+        switch self {
+        case .ad: return "Sosyal medya reklamı"
+        case .friend: return "Arkadaş önerisi"
+        case .store: return "Mağazada/vitrinde gördüm"
+        case .browsing: return "Sıkılıp gezerken denk geldim"
+        case .other: return "Diğer"
+        }
+    }
+}
+
 enum PurchaseCategory: String, Codable, CaseIterable, Identifiable {
     case clothing
     case electronics
@@ -88,6 +109,9 @@ final class PurchaseItem {
     var moodRaw: String?
     var sourceRaw: String = PurchaseSource.manual.rawValue
     var sourceDomain: String?
+    var isNeed: Bool?
+    var alreadyOwnsSimilar: Bool?
+    var triggerRaw: String?
 
     init(
         name: String,
@@ -99,7 +123,10 @@ final class PurchaseItem {
         cooldownHours: Double = 24,
         mood: Mood? = nil,
         source: PurchaseSource = .manual,
-        sourceDomain: String? = nil
+        sourceDomain: String? = nil,
+        isNeed: Bool? = nil,
+        alreadyOwnsSimilar: Bool? = nil,
+        trigger: PurchaseTrigger? = nil
     ) {
         let now = Date.now
         self.id = UUID()
@@ -116,6 +143,9 @@ final class PurchaseItem {
         self.moodRaw = mood?.rawValue
         self.sourceRaw = source.rawValue
         self.sourceDomain = sourceDomain
+        self.isNeed = isNeed
+        self.alreadyOwnsSimilar = alreadyOwnsSimilar
+        self.triggerRaw = trigger?.rawValue
     }
 
     var category: PurchaseCategory {
@@ -146,5 +176,10 @@ final class PurchaseItem {
     var source: PurchaseSource {
         get { PurchaseSource(rawValue: sourceRaw) ?? .manual }
         set { sourceRaw = newValue.rawValue }
+    }
+
+    var trigger: PurchaseTrigger? {
+        get { triggerRaw.flatMap { PurchaseTrigger(rawValue: $0) } }
+        set { triggerRaw = newValue?.rawValue }
     }
 }

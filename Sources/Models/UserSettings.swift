@@ -58,6 +58,17 @@ final class UserSettings {
         }
     }
 
+    /// Monthly income, derived from whichever entry mode the user chose — used to show
+    /// "bu ürün gelirinin %X'i" in the purchase reflection questions.
+    var effectiveMonthlyIncome: Double {
+        switch incomeEntryMode {
+        case .monthly:
+            return monthlyIncome
+        case .hourly:
+            return hourlyWage * hoursPerWeek * 52 / 12
+        }
+    }
+
     /// Whether the current moment falls inside the configured night window (wraps past midnight).
     func isCurrentlyNight(now: Date = .now, calendar: Calendar = .current) -> Bool {
         guard nightModeEnabled else { return false }
