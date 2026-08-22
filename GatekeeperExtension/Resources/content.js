@@ -145,7 +145,7 @@
     return `
       <div class="bekle-card">
         <div class="bekle-header">
-          <span class="bekle-logo">🛡️ Bekle</span>
+          <span class="bekle-logo">🛡️ DurBi</span>
           <button class="bekle-close" data-action="dismiss" title="Kapat (yine de kilitli kalır)">✕</button>
         </div>
         <h1>Bir saniye dur bakalım</h1>
@@ -406,7 +406,7 @@
     const badge = document.createElement("button");
     badge.className = "bekle-floating-badge";
     badge.textContent = "🛡️";
-    badge.title = "Almadan önce Bekle ile kontrol et";
+    badge.title = "Almadan önce DurBi ile kontrol et";
     badge.addEventListener("click", () => showOverlay());
     badgeRoot.appendChild(badge);
   }

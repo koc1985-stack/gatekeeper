@@ -26,7 +26,8 @@ targets:
     info:
       path: Generated/Info.plist
       properties:
-        CFBundleDisplayName: "Bekle"
+        CFBundleDisplayName: "DurBi"
+        CFBundleIconName: AppIcon
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -50,7 +51,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.impulsegatekeeper.app
-        PRODUCT_NAME: "Bekle"
+        PRODUCT_NAME: "DurBi"
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
@@ -73,11 +74,15 @@ targets:
       - path: Sources/Services/WageCalculator.swift
       - path: Sources/Services/CurrencyFormatter.swift
     resources:
-      - path: GatekeeperExtension/Resources
+      - path: GatekeeperExtension/Resources/manifest.json
+      - path: GatekeeperExtension/Resources/background.js
+      - path: GatekeeperExtension/Resources/content.js
+      - path: GatekeeperExtension/Resources/overlay-styles.js
+      - path: GatekeeperExtension/Resources/site-selectors.js
     info:
       path: Generated/GatekeeperExtension-Info.plist
       properties:
-        CFBundleDisplayName: "Bekle"
+        CFBundleDisplayName: "DurBi"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.Safari.web-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
@@ -104,7 +109,7 @@ targets:
     info:
       path: Generated/GatekeeperWidgetExtension-Info.plist
       properties:
-        CFBundleDisplayName: "Bekle Widget"
+        CFBundleDisplayName: "DurBi Widget"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -133,14 +138,15 @@ targets:
     info:
       path: Generated/GatekeeperShareExtension-Info.plist
       properties:
-        CFBundleDisplayName: "Bekle'ye Ekle"
+        CFBundleDisplayName: "DurBi'ye Ekle"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
-          NSExtensionActivationRule:
-            NSExtensionActivationSupportsWebPageWithMaxCount: 1
-            NSExtensionActivationSupportsWebURLWithMaxCount: 1
-            NSExtensionActivationSupportsText: true
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsWebPageWithMaxCount: 1
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsText: true
     entitlements:
       path: GatekeeperShareExtension/GatekeeperShareExtension.entitlements
       properties:

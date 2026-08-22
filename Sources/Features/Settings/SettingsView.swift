@@ -135,7 +135,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Text("Bekle v1.0")
+                    Text("DurBi v1.0")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

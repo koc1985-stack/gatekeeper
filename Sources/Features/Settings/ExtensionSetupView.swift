@@ -21,7 +21,7 @@ struct ExtensionSetupView: View {
 
                 VStack(alignment: .leading, spacing: 16) {
                     stepRow(number: 1, text: "Aşağıdaki butona bas, Ayarlar uygulaması açılsın")
-                    stepRow(number: 2, text: "Safari → Uzantılar → \"Bekle\" uzantısını bul")
+                    stepRow(number: 2, text: "Safari → Uzantılar → \"DurBi\" uzantısını bul")
                     stepRow(number: 3, text: "Uzantıyı aç ve tüm web siteleri için izin ver")
                 }
 

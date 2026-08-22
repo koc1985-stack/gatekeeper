@@ -59,7 +59,7 @@ struct AddFromShareView: View {
                         .padding()
                 }
             }
-            .navigationTitle("Bekle'ye Ekle")
+            .navigationTitle("DurBi'ye Ekle")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("İptal", action: onCancel)

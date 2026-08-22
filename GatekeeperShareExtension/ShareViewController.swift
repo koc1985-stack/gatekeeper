@@ -3,7 +3,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Hosts the SwiftUI "add from share sheet" form. This runs when the user taps Share ▸
-/// "Bekle'ye Ekle" from Safari OR from inside a native app (Trendyol, Amazon, ...) that
+/// "DurBi'ye Ekle" from Safari OR from inside a native app (Trendyol, Amazon, ...) that
 /// supports sharing — unlike the Safari Web Extension, the Share Sheet works everywhere,
 /// there's no way for iOS to auto-detect the price here, so the user confirms it manually.
 final class ShareViewController: UIViewController {
@@ -21,7 +21,7 @@ final class ShareViewController: UIViewController {
                         self?.extensionContext?.completeRequest(returningItems: nil)
                     },
                     onCancel: { [weak self] in
-                        self?.extensionContext?.cancelRequest(withError: NSError(domain: "Bekle", code: 0))
+                        self?.extensionContext?.cancelRequest(withError: NSError(domain: "DurBi", code: 0))
                     }
                 )
             )
