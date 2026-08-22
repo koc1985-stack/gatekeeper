@@ -73,12 +73,17 @@ targets:
       - path: Sources/Services/SharedModelContainer.swift
       - path: Sources/Services/WageCalculator.swift
       - path: Sources/Services/CurrencyFormatter.swift
-    resources:
-      - path: GatekeeperExtension/Resources/manifest.json
-      - path: GatekeeperExtension/Resources/background.js
-      - path: GatekeeperExtension/Resources/content.js
-      - path: GatekeeperExtension/Resources/overlay-styles.js
-      - path: GatekeeperExtension/Resources/site-selectors.js
+    postCompileScripts:
+      - name: Copy Safari Extension Resources
+        script: |
+          set -e
+          DEST="${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}"
+          mkdir -p "$DEST"
+          cp "${SRCROOT}/GatekeeperExtension/Resources/manifest.json" "$DEST/"
+          cp "${SRCROOT}/GatekeeperExtension/Resources/background.js" "$DEST/"
+          cp "${SRCROOT}/GatekeeperExtension/Resources/content.js" "$DEST/"
+          cp "${SRCROOT}/GatekeeperExtension/Resources/overlay-styles.js" "$DEST/"
+          cp "${SRCROOT}/GatekeeperExtension/Resources/site-selectors.js" "$DEST/"
     info:
       path: Generated/GatekeeperExtension-Info.plist
       properties:
