@@ -76,8 +76,8 @@ jobs:
           printf '%s' "$CERT_DEV_P12_BASE64" | tr -d '[:space:]' | base64 --decode > dev.p12
           printf '%s' "$CERT_DIST_P12_BASE64" | tr -d '[:space:]' | base64 --decode > dist.p12
           echo "DEBUG password length: ${#P12_PASSWORD} (expected 32)"
-          echo "DEBUG dev.p12 md5: $(md5 -q dev.p12) (expected ac2762ae0cfa6336dff35741ae8e533e)"
-          echo "DEBUG dist.p12 md5: $(md5 -q dist.p12) (expected 598cfe76f58adbcd222ddca3e78eea8e)"
+          echo "DEBUG dev.p12 md5: $(md5 -q dev.p12) (expected 4ca1df5b8b6f0b7249e2c204f0d5ec36)"
+          echo "DEBUG dist.p12 md5: $(md5 -q dist.p12) (expected ec168e2902f04e6529ebe38434a3cac8)"
           security import dev.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
           security import dist.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
