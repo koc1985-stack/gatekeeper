@@ -19,7 +19,7 @@ struct AddItemView: View {
     @State private var imageData: Data?
     @State private var mood: Mood?
     @State private var showingNightChallenge = false
-    @State private var showPasteSuggestion = false
+    @State private var productLink = ""
 
     private var settings: UserSettings? { settingsList.first }
     private var price: Double { Double(priceText.replacingOccurrences(of: ",", with: ".")) ?? 0 }
@@ -30,14 +30,21 @@ struct AddItemView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Ürün") {
-                    if showPasteSuggestion {
-                        Button {
-                            pasteFromClipboard()
-                        } label: {
-                            Label("Panodaki linki yapıştır", systemImage: "doc.on.clipboard")
+                Section("Ürün Linki") {
+                    HStack {
+                        TextField("Ürünün linkini buraya yapıştır (opsiyonel)", text: $productLink)
+                            .keyboardType(.URL)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        PasteButton(payloadType: URL.self) { urls in
+                            guard let url = urls.first else { return }
+                            productLink = url.absoluteString
                         }
+                        .labelStyle(.iconOnly)
                     }
+                }
+
+                Section("Ürün") {
                     TextField("Ne almak istiyorsun?", text: $name)
                     TextField("Fiyat", text: $priceText)
                         .keyboardType(.decimalPad)
@@ -140,9 +147,10 @@ struct AddItemView: View {
             .onAppear {
                 currencyCode = settings?.currencyCode ?? "TRY"
                 cooldownHours = settings?.defaultCooldownHours ?? 24
-                // .hasURLs only checks presence/type — unlike .url/.string, it does NOT trigger
-                // the system "X pasted from your clipboard" banner, so this is safe to check silently.
-                showPasteSuggestion = UIPasteboard.general.hasURLs
+            }
+            .onChange(of: productLink) { _, newValue in
+                guard name.isEmpty, let url = URL(string: newValue), let host = url.host else { return }
+                name = host
             }
             .fullScreenCover(isPresented: $showingNightChallenge) {
                 NightChallengeView(
@@ -154,16 +162,6 @@ struct AddItemView: View {
         }
     }
 
-    private func pasteFromClipboard() {
-        if let url = UIPasteboard.general.url {
-            note = url.absoluteString
-            if name.isEmpty {
-                name = url.host ?? url.absoluteString
-            }
-        }
-        showPasteSuggestion = false
-    }
-
     private func attemptSave() {
         if isNightRightNow {
             showingNightChallenge = true
@@ -173,16 +171,21 @@ struct AddItemView: View {
     }
 
     private func save() {
+        var combinedNote = note
+        if !productLink.isEmpty {
+            combinedNote = note.isEmpty ? productLink : "\(productLink)\n\(note)"
+        }
         let item = PurchaseItem(
             name: name,
             price: price,
             currencyCode: currencyCode,
-            note: note,
+            note: combinedNote,
             imageData: imageData,
             category: category,
             cooldownHours: cooldownHours,
             mood: mood,
-            source: .manual
+            source: .manual,
+            sourceDomain: URL(string: productLink)?.host
         )
         modelContext.insert(item)
         NotificationService.shared.scheduleReminder(for: item)

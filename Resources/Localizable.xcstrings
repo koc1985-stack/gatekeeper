@@ -1,6 +1,18 @@
 {
   "sourceLanguage" : "tr",
   "strings" : {
+    "Ürün Linki" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Product Link" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ürün Linki" } }
+      }
+    },
+    "Ürünün linkini buraya yapıştır (opsiyonel)" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Paste the product link here (optional)" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ürünün linkini buraya yapıştır (opsiyonel)" } }
+      }
+    },
     "Stresli" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Stressed" } },
