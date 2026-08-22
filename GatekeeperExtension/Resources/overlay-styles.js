@@ -1,6 +1,23 @@
 // Injected into the overlay's shadow root (mode: "closed") so host-page CSS can never leak in
 // or out — kept as a plain string rather than a separate stylesheet file for simplicity.
 const BEKLE_OVERLAY_CSS = `
+  .bekle-floating-badge {
+    position: fixed;
+    right: 16px;
+    bottom: 24px;
+    z-index: 2147483000;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: #ff6b35;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .bekle-backdrop {
     position: fixed;
     inset: 0;

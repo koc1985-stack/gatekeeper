@@ -1,7 +1,8 @@
-// Bekle content script. Runs on Trendyol/Amazon/Zara/H&M. Tries to find the checkout page's
-// confirm button and total price via site-selectors.js; if it can't (stale selector, site
-// redesign), it degrades to a small floating badge + manual price entry instead of doing
-// nothing. This file could not be tested against the live sites — see site-selectors.js header.
+// Bekle content script. Runs on the sites listed in manifest.json. Tries to find the checkout
+// page's confirm button and total price via site-selectors.js's per-site config, then its
+// text/price-shape-based generic fallbacks; if even those find nothing, a persistent floating
+// badge still lets the user trigger the reflection flow manually. This file could not be tested
+// against the live sites — see site-selectors.js header.
 (function () {
   "use strict";
 
@@ -19,9 +20,12 @@
   window.__bekleBypassed = window.__bekleBypassed || false;
 
   function detectPrice() {
-    if (!siteConfig) return null;
-    const el = bekleFindFirst(siteConfig.totalPriceSelectors);
-    return el ? bekleParsePrice(el.textContent) : null;
+    if (siteConfig) {
+      const el = bekleFindFirst(siteConfig.totalPriceSelectors);
+      const price = el ? bekleParsePrice(el.textContent) : null;
+      if (price) return price;
+    }
+    return bekleFindPriceGeneric();
   }
 
   function detectName() {
@@ -31,8 +35,11 @@
   }
 
   function findConfirmButton() {
-    if (!siteConfig) return null;
-    return bekleFindFirst(siteConfig.confirmButtonSelectors);
+    if (siteConfig) {
+      const bySelector = bekleFindFirst(siteConfig.confirmButtonSelectors);
+      if (bySelector) return bySelector;
+    }
+    return bekleFindButtonByText();
   }
 
   function interceptConfirmButton() {
@@ -387,10 +394,31 @@
     }
   }
 
+  function ensureFloatingBadge() {
+    if (document.getElementById("bekle-badge-host") || overlayShown) return;
+    const host = document.createElement("div");
+    host.id = "bekle-badge-host";
+    document.documentElement.appendChild(host);
+    const badgeRoot = host.attachShadow({ mode: "closed" });
+    const style = document.createElement("style");
+    style.textContent = BEKLE_OVERLAY_CSS;
+    badgeRoot.appendChild(style);
+    const badge = document.createElement("button");
+    badge.className = "bekle-floating-badge";
+    badge.textContent = "🛡️";
+    badge.title = "Almadan önce Bekle ile kontrol et";
+    badge.addEventListener("click", () => showOverlay());
+    badgeRoot.appendChild(badge);
+  }
+
   function boot() {
     interceptConfirmButton();
     const observer = new MutationObserver(() => interceptConfirmButton());
     observer.observe(document.body, { childList: true, subtree: true });
+    // Some sites' confirm button never matches (unusual markup, needs a real click to render,
+    // etc.) — a persistent manual trigger means the feature still does *something* everywhere
+    // this content script runs, instead of silently doing nothing.
+    setTimeout(ensureFloatingBadge, 2000);
   }
 
   if (document.readyState === "loading") {

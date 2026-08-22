@@ -1,8 +1,10 @@
 // Best-effort DOM hooks per retailer. These are educated guesses at common checkout markup —
 // I (the assistant that wrote this) could not open these sites to verify them, so treat every
-// selector here as "probably needs tuning on a real device." content.js always falls back to a
-// manual price entry + a generic checkout-URL trigger when a selector below finds nothing, so
-// the feature still works even when a selector is stale.
+// selector here as "probably needs tuning on a real device." For sites without an entry (or
+// where the entry's selectors don't match), content.js falls back to bekleFindButtonByText /
+// bekleFindPriceGeneric below, which work by scanning for common confirm-button label text and
+// price-shaped numbers rather than relying on any one site's exact class names — much more
+// resilient to redesigns, at the cost of being a bit less precise.
 const BEKLE_SITE_SELECTORS = {
   "trendyol.com": {
     checkoutUrlPattern: /(sepet|checkout|siparis-oncesi|odeme)/i,
@@ -57,6 +59,26 @@ const BEKLE_SITE_SELECTORS = {
       ".cart-summary-total",
       "[data-elid='cart-total-price']"
     ]
+  },
+  "hepsiburada.com": {
+    checkoutUrlPattern: /(sepet|checkout|odeme)/i,
+    confirmButtonSelectors: ["button[class*='confirm']", "button[class*='onayla']"],
+    totalPriceSelectors: [".price-summary-total", "[class*='grand-total']"]
+  },
+  "n11.com": {
+    checkoutUrlPattern: /(sepet|checkout|odeme)/i,
+    confirmButtonSelectors: ["button[class*='confirm']", "a[class*='confirm']"],
+    totalPriceSelectors: [".proceedToPaymentSection .amount", "[class*='grandTotal']"]
+  },
+  "boyner.com.tr": {
+    checkoutUrlPattern: /(sepet|checkout|odeme)/i,
+    confirmButtonSelectors: [],
+    totalPriceSelectors: []
+  },
+  "lcw.com": {
+    checkoutUrlPattern: /(sepet|checkout|odeme)/i,
+    confirmButtonSelectors: [],
+    totalPriceSelectors: []
   }
 };
 
@@ -92,4 +114,56 @@ function bekleParsePrice(text) {
   cleaned = cleaned.replace(decimalSep, ".");
   const value = parseFloat(cleaned);
   return Number.isNaN(value) ? null : value;
+}
+
+// Site-agnostic fallback: look for a clickable element whose visible label matches a common
+// "confirm the purchase" phrase, in Turkish or English. Far more resilient to redesigns than
+// hardcoded class names, and works on sites we never explicitly configured.
+const BEKLE_CONFIRM_BUTTON_PHRASES = [
+  "sepeti onayla",
+  "siparişi onayla",
+  "siparişi tamamla",
+  "siparişi ver",
+  "ödemeye geç",
+  "ödemeyi tamamla",
+  "ödeme yap",
+  "satın al",
+  "hemen al",
+  "place order",
+  "complete order",
+  "proceed to checkout",
+  "pay now",
+  "confirm order",
+  "confirm purchase",
+  "buy now",
+  "checkout now"
+];
+
+function bekleFindButtonByText() {
+  const candidates = document.querySelectorAll("button, a[role='button'], input[type='submit'], input[type='button']");
+  for (const el of candidates) {
+    const raw = el.innerText || el.value || el.getAttribute("aria-label") || "";
+    const text = raw.trim().toLowerCase();
+    if (!text || text.length > 40) continue;
+    for (const phrase of BEKLE_CONFIRM_BUTTON_PHRASES) {
+      if (text.includes(phrase)) return el;
+    }
+  }
+  return null;
+}
+
+// Site-agnostic price fallback: scan elements whose class/id hints at a price/total and whose
+// text actually looks like a currency amount.
+function bekleFindPriceGeneric() {
+  const candidates = document.querySelectorAll(
+    "[class*='price' i], [class*='fiyat' i], [class*='tutar' i], [class*='total' i], [id*='price' i], [id*='total' i]"
+  );
+  for (const el of candidates) {
+    const text = el.textContent || "";
+    if (/[₺$€]|\bTL\b/.test(text)) {
+      const price = bekleParsePrice(text);
+      if (price && price > 0 && price < 10000000) return price;
+    }
+  }
+  return null;
 }
