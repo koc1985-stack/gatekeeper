@@ -19,6 +19,7 @@ struct AddItemView: View {
     @State private var imageData: Data?
     @State private var mood: Mood?
     @State private var showingNightChallenge = false
+    @State private var showPasteSuggestion = false
 
     private var settings: UserSettings? { settingsList.first }
     private var price: Double { Double(priceText.replacingOccurrences(of: ",", with: ".")) ?? 0 }
@@ -30,6 +31,13 @@ struct AddItemView: View {
         NavigationStack {
             Form {
                 Section("Ürün") {
+                    if showPasteSuggestion {
+                        Button {
+                            pasteFromClipboard()
+                        } label: {
+                            Label("Panodaki linki yapıştır", systemImage: "doc.on.clipboard")
+                        }
+                    }
                     TextField("Ne almak istiyorsun?", text: $name)
                     TextField("Fiyat", text: $priceText)
                         .keyboardType(.decimalPad)
@@ -132,6 +140,9 @@ struct AddItemView: View {
             .onAppear {
                 currencyCode = settings?.currencyCode ?? "TRY"
                 cooldownHours = settings?.defaultCooldownHours ?? 24
+                // .hasURLs only checks presence/type — unlike .url/.string, it does NOT trigger
+                // the system "X pasted from your clipboard" banner, so this is safe to check silently.
+                showPasteSuggestion = UIPasteboard.general.hasURLs
             }
             .fullScreenCover(isPresented: $showingNightChallenge) {
                 NightChallengeView(
@@ -141,6 +152,16 @@ struct AddItemView: View {
                 )
             }
         }
+    }
+
+    private func pasteFromClipboard() {
+        if let url = UIPasteboard.general.url {
+            note = url.absoluteString
+            if name.isEmpty {
+                name = url.host ?? url.absoluteString
+            }
+        }
+        showPasteSuggestion = false
     }
 
     private func attemptSave() {
