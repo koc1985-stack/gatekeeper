@@ -3,6 +3,11 @@
   "name": "DurBi: Alışveriş Freni",
   "description": "Alışveriş sitelerinde ödeme yapmadan önce bir kez daha düşünmeni sağlar.",
   "version": "1.0",
+  "icons": {
+    "48": "icon-48.png",
+    "96": "icon-96.png",
+    "128": "icon-128.png"
+  },
   "background": {
     "service_worker": "background.js"
   },

@@ -84,6 +84,9 @@ targets:
           cp "${SRCROOT}/GatekeeperExtension/Resources/content.js" "$DEST/"
           cp "${SRCROOT}/GatekeeperExtension/Resources/overlay-styles.js" "$DEST/"
           cp "${SRCROOT}/GatekeeperExtension/Resources/site-selectors.js" "$DEST/"
+          cp "${SRCROOT}/GatekeeperExtension/Resources/icon-48.png" "$DEST/"
+          cp "${SRCROOT}/GatekeeperExtension/Resources/icon-96.png" "$DEST/"
+          cp "${SRCROOT}/GatekeeperExtension/Resources/icon-128.png" "$DEST/"
     info:
       path: Generated/GatekeeperExtension-Info.plist
       properties:
