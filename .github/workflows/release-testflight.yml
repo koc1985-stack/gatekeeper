@@ -69,10 +69,14 @@ jobs:
           CERT_P12_PASSWORD: ${{ secrets.CERT_P12_PASSWORD }}
         run: |
           set -e
-          echo "$CERT_DEV_P12_BASE64" | base64 --decode > dev.p12
-          echo "$CERT_DIST_P12_BASE64" | base64 --decode > dist.p12
-          security import dev.p12 -k build.keychain -P "$CERT_P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
-          security import dist.p12 -k build.keychain -P "$CERT_P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          # Secrets pasted via a text editor can pick up a trailing newline, which would make
+          # the password/base64 string not byte-match what openssl actually used — strip any
+          # trailing whitespace defensively so copy-paste doesn't silently break the import.
+          P12_PASSWORD=$(printf '%s' "$CERT_P12_PASSWORD" | tr -d '[:space:]')
+          printf '%s' "$CERT_DEV_P12_BASE64" | tr -d '[:space:]' | base64 --decode > dev.p12
+          printf '%s' "$CERT_DIST_P12_BASE64" | tr -d '[:space:]' | base64 --decode > dist.p12
+          security import dev.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security import dist.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
           rm -f dev.p12 dist.p12
 
