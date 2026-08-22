@@ -46,11 +46,6 @@ jobs:
           mkdir -p "$HOME/private_keys"
           printf '%s' "$ASC_API_KEY_P8" > "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8"
 
-      # Without a dedicated, unlocked, writable keychain, automatic signing can create a new
-      # certificate via the API but has nowhere reliable to store the matching private key —
-      # it silently fails to persist it, so the very next signing check reports "already has a
-      # certificate for this machine, but its private key is not installed" even within the same
-      # run. This is the standard fix used by every iOS CI pipeline (fastlane match, etc).
       - name: Set up temporary keychain
         run: |
           security create-keychain -p "" build.keychain
@@ -58,6 +53,28 @@ jobs:
           security default-keychain -s build.keychain
           security unlock-keychain -p "" build.keychain
           security set-keychain-settings -lut 21600 build.keychain
+
+      # xcodebuild's automatic signing can create a brand-new certificate via the API, but it
+      # will never auto-revoke an existing one — every fresh runner has an empty keychain, so
+      # each run either leaves an orphaned certificate behind or fails outright with "already
+      # has a certificate for this machine, but its private key is not installed". The fix
+      # (same one fastlane match uses) is to stop asking Xcode to create certificates at all:
+      # import one persistent Development + Distribution certificate/key pair every run, so a
+      # matching private key is always already present and automatic signing only has to manage
+      # provisioning profiles.
+      - name: Import signing certificates
+        env:
+          CERT_DEV_P12_BASE64: ${{ secrets.CERT_DEV_P12_BASE64 }}
+          CERT_DIST_P12_BASE64: ${{ secrets.CERT_DIST_P12_BASE64 }}
+          CERT_P12_PASSWORD: ${{ secrets.CERT_P12_PASSWORD }}
+        run: |
+          set -e
+          echo "$CERT_DEV_P12_BASE64" | base64 --decode > dev.p12
+          echo "$CERT_DIST_P12_BASE64" | base64 --decode > dist.p12
+          security import dev.p12 -k build.keychain -P "$CERT_P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security import dist.p12 -k build.keychain -P "$CERT_P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+          rm -f dev.p12 dist.p12
 
       # -allowProvisioningUpdates is the whole point here: with a real App Store Connect API
       # key, xcodebuild does exactly what interactive Xcode's automatic signing does — creates/
