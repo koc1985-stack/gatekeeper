@@ -103,10 +103,6 @@ jobs:
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             archive
 
-      - name: DEBUG list Safari extension bundle contents
-        run: |
-          find "build/ImpulseGatekeeper.xcarchive/Products/Applications" -iname "*.appex" -exec sh -c 'echo "--- $1 ---"; find "$1"' _ {} \;
-
       - name: Export & upload to TestFlight
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
