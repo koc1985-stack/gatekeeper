@@ -1,6 +1,12 @@
 *.ipa
 *.zip
 .claude/
+*.p8
+*.mobileprovision
+*.cer
+*.p12
+key*.png
+ExportOptions.plist
 Payload/
 build/
 Generated/

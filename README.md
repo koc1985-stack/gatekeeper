@@ -43,7 +43,19 @@ Bu proje **Windows üzerinde, kod düzeyinde tamamen yazıldı** ama iOS uygulam
 
 Gerçek App Store Connect ürünlerini (fiyat, deneme süresi vb.) kendi hesabından oluşturup aynı ID'lerle eşleştirdiğinde canlıya geçebilirsin — App Store Connect'e benim erişimim yok.
 
-## Mac'siz test: GitHub Actions + Sideloadly
+## Mac'siz test (önerilen): GitHub Actions + TestFlight
+
+Sideloadly/AltStore gibi araçlar, App Group gerektiren çoklu-uzantılı bu uygulamayı (widget + Safari uzantısı + Share uzantısı) güvenilir şekilde imzalayamadı — bu araçlar Apple'ın "otomatik imzalama" mantığını taklit ediyor ama App ID/App Group eşleştirmesini gerçek Xcode kadar doğru yapamıyor. Bunun yerine `.github/workflows/release-testflight.yml`, gerçek bir App Store Connect API anahtarıyla GitHub Actions'taki gerçek Xcode'u kullanıp uygulamayı **doğru şekilde imzalayıp doğrudan TestFlight'a yüklüyor** — üçüncü parti bir imzalama aracına hiç gerek kalmıyor.
+
+**Tek seferlik kurulum** (detaylar konuşma geçmişinde, özet):
+1. [appstoreconnect.apple.com](https://appstoreconnect.apple.com) → Integrations → Keys'ten bir API anahtarı oluştur (App Manager rolü), `.p8` dosyasını indir, Key ID + Issuer ID'yi not al.
+2. App Store Connect'te `com.impulsegatekeeper.app` bundle ID'siyle "Bekle" adında bir uygulama kaydı aç (App Store'a göndermeden, sadece TestFlight için gerekli).
+3. GitHub reposu → Settings → Secrets and variables → Actions'a üç secret ekle: `ASC_API_KEY_P8` (.p8 dosyasının tüm içeriği), `ASC_KEY_ID`, `ASC_ISSUER_ID`.
+4. GitHub'da **Actions** → "Release to TestFlight" → **Run workflow**. Bittiğinde Apple ~10-30 dakika işler, sonra iPhone'una **TestFlight** uygulamasını (App Store'dan ücretsiz) kurup içeride "Bekle"yi göreceksin — hesabın uygulamanın kendi App Store Connect ekibinde olduğu için (dahili test) inceleme beklemeden direkt kurulur.
+
+Bundan sonra her `git push` otomatik olarak yeni bir TestFlight sürümü yükler — Sideloadly/AltStore dansına bir daha gerek yok, ve App Group/widget/uzantılar Apple'ın kendi imzalama altyapısı kullanıldığı için garantili çalışır.
+
+## Mac'siz test (eski/yedek yöntem): GitHub Actions + Sideloadly
 
 Mac'in yoksa `.github/workflows/build-ios.yml`, her `workflow_dispatch` tetiklemesinde (GitHub reposu → **Actions** sekmesi → "Build iOS IPA (unsigned, for Sideloadly)" → **Run workflow**) imzasız bir `.ipa` üretir ve Actions çalışmasının **Artifacts** bölümüne yükler — Kozmika/Yıldız Haritası projesinde kullandığın yöntemin aynısı.
 
@@ -76,7 +88,7 @@ Ana uygulamanın yanına iki yeni Xcode hedefi eklendi: **GatekeeperExtension** 
 
 ## Bilinen sorunlar
 
-- **Widget imza geçmişi.** İlk Sideloadly kurulumunda `GatekeeperWidgetExtension` süreci `CODESIGNING` / "Invalid Page" hatasıyla çöktü ve muhtemelen bu yüzden ana uygulama da hiç açılmadı. Ayrıca ayrı olarak, Sideloadly bir `.ipa`'yı var olan kuruluma "upgrade" olarak yazmaya çalışırken entitlement uyuşmazlığı yaşayıp kurulumu reddedebiliyor (`MismatchedApplicationIdentifierEntitlement`). İkinci sorun, ilk widget çökmesinin de gerçek sebebi olabilir — çözüm ikisinde de aynı: **her yeni build'i kurmadan önce eski "Bekle" uygulamasını telefondan tamamen sil, üstüne yazma (upgrade) yapma.** Widget şu an tekrar pakete gömülü; temiz kurulumla sorun çözülmezse tekrar geçici olarak çıkarılabilir (`project.yml` → `ImpulseGatekeeper` hedefinin `dependencies` listesi).
+- **Sideloadly/AltStore ile widget + Safari uzantısı + Share uzantısı hiçbirinin görünmediği tespit edildi** (widget `CODESIGNING`/"Invalid Page" ile çöktü; diğer ikisi Ayarlar'da/paylaşım menüsünde hiç görünmedi) — App Group gerektiren çoklu-uzantılı uygulamaların bu araçlarla imzalanamaması bilinen bir sınırlama. Çözüm: yukarıdaki **TestFlight** yöntemi (gerçek Xcode + Apple'ın kendi imzalama altyapısı). Sideloadly bölümü sadece uzantısız/tek-hedefli hızlı testler için hâlâ geçerli.
 
 ## Bilinen eksikler / sıradaki adımlar
 
@@ -95,8 +107,12 @@ GatekeeperExtension/               — Safari Web Extension
   SafariWebExtensionHandler.swift  — JS ↔ paylaşımlı SwiftData köprüsü
   Resources/                       — manifest.json, content.js, site-selectors.js, background.js
 GatekeeperWidget/                  — WidgetKit hedefi (ana ekran + kilit ekranı)
+GatekeeperShareExtension/          — Share Sheet'ten "Bekle'ye Ekle" (her app/sitede çalışır)
 Resources/
   Localizable.xcstrings, Assets.xcassets, Configuration.storekit
+.github/workflows/
+  build-ios.yml            — imzasız ipa (Sideloadly, eski/yedek yöntem)
+  release-testflight.yml   — otomatik imzala + TestFlight'a yükle (önerilen yöntem)
 ```
 
 Bir derleme hatası alırsan, hata mesajını buraya yapıştır — birlikte düzeltelim.

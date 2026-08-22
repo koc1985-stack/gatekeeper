@@ -13,6 +13,8 @@ settings:
     DEVELOPMENT_LANGUAGE: tr
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: "R6W7XU4TM7"
+    CODE_SIGN_STYLE: Automatic
 targets:
   ImpulseGatekeeper:
     type: application
@@ -42,7 +44,7 @@ targets:
           - iCloud.com.impulsegatekeeper.app
         com.apple.developer.icloud-services:
           - CloudKit
-        aps-environment: development
+        aps-environment: production
         com.apple.security.application-groups:
           - group.com.impulsegatekeeper.app
     settings:

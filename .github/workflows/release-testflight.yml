@@ -1,0 +1,110 @@
+name: Release to TestFlight
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "Sources/**"
+      - "Resources/**"
+      - "GatekeeperExtension/**"
+      - "GatekeeperWidget/**"
+      - "GatekeeperShareExtension/**"
+      - "project.yml"
+      - ".github/workflows/release-testflight.yml"
+
+jobs:
+  release:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Same reasoning as build-ios.yml: pick the newest installed Xcode so XcodeGen's
+      # generated project format matches what's actually on the runner.
+      - name: Select latest available Xcode
+        run: |
+          LATEST_XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Seçilen Xcode: $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Set up App Store Connect API key
+        env:
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          set -e
+          mkdir -p "$HOME/private_keys"
+          printf '%s' "$ASC_API_KEY_P8" > "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+
+      # -allowProvisioningUpdates is the whole point here: with a real App Store Connect API
+      # key, xcodebuild does exactly what interactive Xcode's automatic signing does — creates/
+      # updates the App IDs, the App Group, and the provisioning profiles for the main app AND
+      # all three extensions — which is precisely the step every sideloading tool we tried
+      # couldn't do correctly.
+      - name: Archive (automatic signing)
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          xcodebuild \
+            -project ImpulseGatekeeper.xcodeproj \
+            -scheme ImpulseGatekeeper \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/ImpulseGatekeeper.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            archive
+
+      - name: Export & upload to TestFlight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -e
+          cat > ExportOptions.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>destination</key>
+              <string>upload</string>
+              <key>teamID</key>
+              <string>R6W7XU4TM7</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild -exportArchive \
+            -archivePath build/ImpulseGatekeeper.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Upload export log (for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-logs
+          path: build/export
+          retention-days: 7
