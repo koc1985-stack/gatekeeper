@@ -6,6 +6,7 @@ struct PaywallView: View {
     @State private var storeService = StoreService.shared
     @State private var isPurchasing = false
     @State private var hasAttemptedLoad = false
+    @State private var isRetrying = false
     @State private var errorMessage: String?
 
     var body: some View {
@@ -39,8 +40,18 @@ struct PaywallView: View {
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
-                                Button("Tekrar Dene") { Task { await reloadProducts() } }
-                                    .buttonStyle(.bordered)
+                                if let lastLoadError = storeService.lastLoadError {
+                                    Text(lastLoadError)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .multilineTextAlignment(.center)
+                                }
+                                if isRetrying {
+                                    ProgressView()
+                                } else {
+                                    Button("Tekrar Dene") { Task { await reloadProducts() } }
+                                        .buttonStyle(.bordered)
+                                }
                             }
                         } else {
                             ProgressView()
@@ -93,8 +104,10 @@ struct PaywallView: View {
     }
 
     private func reloadProducts() async {
+        isRetrying = true
         await storeService.loadProducts()
         hasAttemptedLoad = true
+        isRetrying = false
     }
 
     private func purchase(_ product: Product) {

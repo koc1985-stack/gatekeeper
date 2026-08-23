@@ -17,6 +17,10 @@ final class StoreService {
 
     private(set) var products: [Product] = []
     private(set) var isPremium: Bool = false
+    /// Set when `Product.products(for:)` throws, so the paywall can show *why* loading
+    /// failed instead of a silent empty state — StoreKit errors are otherwise invisible
+    /// without an Xcode console attached.
+    private(set) var lastLoadError: String?
 
     private var transactionListener: Task<Void, Never>?
 
@@ -33,11 +37,14 @@ final class StoreService {
     }
 
     func loadProducts() async {
-        guard let fetched = try? await Product.products(for: Self.productIDs) else {
+        do {
+            let fetched = try await Product.products(for: Self.productIDs)
+            products = fetched.sorted { $0.price < $1.price }
+            lastLoadError = fetched.isEmpty ? "Ürün bulunamadı (App Store Connect'te henüz yayılmamış olabilir)." : nil
+        } catch {
             products = []
-            return
+            lastLoadError = error.localizedDescription
         }
-        products = fetched.sorted { $0.price < $1.price }
     }
 
     @discardableResult
