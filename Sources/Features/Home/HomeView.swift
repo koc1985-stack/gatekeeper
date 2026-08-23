@@ -55,6 +55,13 @@ struct HomeView: View {
                 PaywallView()
             }
             .onReceive(timer) { now = $0 }
+            .safeAreaInset(edge: .bottom) {
+                if !storeService.isPremium {
+                    BannerAdView()
+                        .frame(maxWidth: .infinity)
+                        .background(.bar)
+                }
+            }
         }
     }
 

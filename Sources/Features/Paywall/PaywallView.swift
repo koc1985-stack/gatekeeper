@@ -18,6 +18,11 @@ struct PaywallView: View {
                         .font(.largeTitle.bold())
                         .multilineTextAlignment(.center)
 
+                    Text("Tek seferlik ödeme, ömür boyu sınırsız erişim. Abonelik yok.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+
                     VStack(alignment: .leading, spacing: 14) {
                         FeatureRow(icon: "infinity", text: "Sınırsız istek takibi")
                         FeatureRow(icon: "slider.horizontal.3", text: "Özel soğuma süreleri (12 saat - 7 gün)")

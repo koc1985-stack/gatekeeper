@@ -15,6 +15,13 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     DEVELOPMENT_TEAM: "R6W7XU4TM7"
     CODE_SIGN_STYLE: Automatic
+packages:
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: 7.1.0
+  GoogleMobileAds:
+    url: https://github.com/googleads/swift-package-manager-google-mobile-ads.git
+    from: 13.0.0
 targets:
   ImpulseGatekeeper:
     type: application
@@ -38,9 +45,24 @@ targets:
         LSApplicationQueriesSchemes:
           - instagram-stories
         ITSAppUsesNonExemptEncryption: false
+        # Google Sign-In: OAuth client ID from Google Cloud Console for this bundle ID
+        # (com.impulsegatekeeper.app) — until a real one is set, GoogleSignInSupport.isConfigured
+        # keeps the Google sign-in button hidden instead of failing when tapped.
+        GIDClientID: "REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - "com.googleusercontent.apps.REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID"
+        # AdMob: Google's public TEST App ID — swap for DurBi's real App ID once it's
+        # registered at admob.google.com (must match AdsSupport.bannerAdUnitID's account).
+        GADApplicationIdentifier: "ca-app-pub-3940256099942544~1458002511"
+        NSUserTrackingUsageDescription: "Sana daha uygun reklamlar gösterebilmemiz için bu izne ihtiyacımız var. İzin vermesen de uygulamayı sorunsuz kullanmaya devam edebilirsin."
+        SKAdNetworkItems:
+          - SKAdNetworkIdentifier: "cstr6suwn9.skadnetwork"
     entitlements:
       path: ImpulseGatekeeper.entitlements
       properties:
+        com.apple.developer.applesignin:
+          - Default
         com.apple.developer.icloud-container-identifiers:
           - iCloud.com.impulsegatekeeper.app
         com.apple.developer.icloud-services:
@@ -62,6 +84,10 @@ targets:
         embed: true
       - target: GatekeeperShareExtension
         embed: true
+      - package: GoogleSignIn
+        product: GoogleSignIn
+      - package: GoogleMobileAds
+        product: GoogleMobileAds
 
   GatekeeperExtension:
     type: app-extension

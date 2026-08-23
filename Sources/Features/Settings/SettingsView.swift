@@ -12,6 +12,8 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                ProfileSection()
+
                 Section("Kazanç") {
                     Button {
                         showingWageEditor = true

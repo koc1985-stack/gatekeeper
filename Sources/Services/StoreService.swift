@@ -12,8 +12,6 @@ final class StoreService {
     static let shared = StoreService()
 
     static let productIDs = [
-        "com.impulsegatekeeper.premium.monthly",
-        "com.impulsegatekeeper.premium.yearly",
         "com.impulsegatekeeper.premium.lifetime"
     ]
 
