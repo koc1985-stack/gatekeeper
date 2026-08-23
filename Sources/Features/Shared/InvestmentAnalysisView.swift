@@ -24,6 +24,15 @@ struct InvestmentAnalysisView: View {
         selectedAsset.projectedSeries(includingLive: liveValue)
     }
 
+    /// X ekseninin otomatik hesaplanan alanına güvenmek yerine gerçek yıl aralığına açıkça
+    /// sabitliyoruz — aksi halde Charts'ın otomatik alan seçimi (log Y ölçeğiyle birleşince)
+    /// veriyi grafiğin kenarına sıkıştırıp tek bir dikey çizgi gibi göstermesine yol açıyordu.
+    private var xDomain: ClosedRange<Int> {
+        let years = series.historical.map(\.year) + series.projected.map(\.year)
+        guard let minYear = years.min(), let maxYear = years.max() else { return 2016...2031 }
+        return minYear...maxYear
+    }
+
     private var accentColor: Color { Self.color(for: selectedAsset) }
 
     private static func color(for asset: TurkishInvestmentAsset) -> Color {
@@ -178,6 +187,7 @@ struct InvestmentAnalysisView: View {
         // Logaritmik ölçek: TRY cinsinden bu araçların 10 yıllık büyümesi kat kat (bazen 10x+)
         // olduğundan, doğrusal bir eksen erken yılları görünmez kılıp trendi tek bir sıçrama gibi
         // gösterir. Log ölçek, her yıldaki oransal değişimi de doğru şekilde okunabilir kılar.
+        .chartXScale(domain: xDomain)
         .chartYScale(type: .log)
         .chartLegend(.hidden)
         .frame(height: 240)
