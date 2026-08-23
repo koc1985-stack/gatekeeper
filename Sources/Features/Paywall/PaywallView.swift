@@ -5,6 +5,7 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var storeService = StoreService.shared
     @State private var isPurchasing = false
+    @State private var hasAttemptedLoad = false
     @State private var errorMessage: String?
 
     var body: some View {
@@ -32,8 +33,19 @@ struct PaywallView: View {
                     .padding(.horizontal, 8)
 
                     if storeService.products.isEmpty {
-                        ProgressView()
-                            .task { await storeService.loadProducts() }
+                        if hasAttemptedLoad {
+                            VStack(spacing: 12) {
+                                Text("Satın alma seçenekleri şu anda yüklenemedi.")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                                Button("Tekrar Dene") { Task { await reloadProducts() } }
+                                    .buttonStyle(.bordered)
+                            }
+                        } else {
+                            ProgressView()
+                                .task { await reloadProducts() }
+                        }
                     } else {
                         VStack(spacing: 12) {
                             ForEach(storeService.products) { product in
@@ -78,6 +90,11 @@ struct PaywallView: View {
                 if isPremium { dismiss() }
             }
         }
+    }
+
+    private func reloadProducts() async {
+        await storeService.loadProducts()
+        hasAttemptedLoad = true
     }
 
     private func purchase(_ product: Product) {

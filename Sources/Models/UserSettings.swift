@@ -35,6 +35,7 @@ final class UserSettings {
     var nightModeStartHour: Int = 23
     var nightModeEndHour: Int = 5
     var nightChallengeRaw: String = NightChallenge.hold.rawValue
+    var hasUsedFreeInvestmentAnalysis: Bool = false
 
     init() {}
 

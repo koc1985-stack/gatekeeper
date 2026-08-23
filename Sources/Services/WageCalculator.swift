@@ -1,28 +1,5 @@
 import Foundation
 
-/// Historical average annual returns — rough, well-known long-run estimates, not a guarantee.
-/// Shown to the user with an explicit "geçmiş performans gelecek için garanti değildir" disclaimer.
-enum InvestmentAsset: String, CaseIterable, Identifiable {
-    case sp500
-    case gold
-
-    var id: String { rawValue }
-
-    var annualReturnRate: Double {
-        switch self {
-        case .sp500: return 0.10
-        case .gold: return 0.07
-        }
-    }
-
-    var displayName: LocalizedStringResource {
-        switch self {
-        case .sp500: return "S&P 500"
-        case .gold: return "Altın"
-        }
-    }
-}
-
 enum WageCalculator {
     /// Converts a monthly net income into an hourly wage given a weekly working-hours figure.
     static func hourlyWage(fromMonthlyIncome monthly: Double, hoursPerWeek: Double) -> Double {

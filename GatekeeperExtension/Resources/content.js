@@ -139,8 +139,11 @@
     const currencyCode = state.wageInfo?.ok ? state.wageInfo.currencyCode : "TRY";
     const hasPrice = typeof state.price === "number" && state.price > 0;
     const hours = hasPrice && hourlyWage > 0 ? state.price / hourlyWage : 0;
-    const sp500 = hasPrice ? state.price * Math.pow(1.10, 3) : 0;
-    const gold = hasPrice ? state.price * Math.pow(1.07, 3) : 0;
+    // Son 10 yıl (2016-2025) gerçek yıl sonu verilerinden türetilmiş yaklaşık yıllık ortalama
+    // değişim oranları — bkz. Sources/Services/TurkishInvestmentAsset.swift (uygulama içi analiz
+    // ekranıyla aynı varsayımlar, farklı platformlarda kod tekrarını önlemek için burada sabitlendi).
+    const gramGold = hasPrice ? state.price * Math.pow(1.462, 3) : 0;
+    const usd = hasPrice ? state.price * Math.pow(1.317, 3) : 0;
 
     return `
       <div class="bekle-card">
@@ -166,8 +169,8 @@
           hasPrice
             ? `<div class="bekle-invest">
                  <p class="bekle-invest-title">Bu parayı 3 yıl yatırsaydın?</p>
-                 <div class="bekle-invest-row"><span>S&amp;P 500</span><strong>${formatCurrency(sp500, currencyCode)}</strong></div>
-                 <div class="bekle-invest-row"><span>Altın</span><strong>${formatCurrency(gold, currencyCode)}</strong></div>
+                 <div class="bekle-invest-row"><span>Gram Altın</span><strong>${formatCurrency(gramGold, currencyCode)}</strong></div>
+                 <div class="bekle-invest-row"><span>Dolar</span><strong>${formatCurrency(usd, currencyCode)}</strong></div>
                </div>`
             : ""
         }

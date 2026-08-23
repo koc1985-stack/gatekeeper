@@ -25,6 +25,8 @@ struct AddItemView: View {
     @State private var isNeed: Bool?
     @State private var alreadyOwnsSimilar: Bool?
     @State private var trigger: PurchaseTrigger?
+    @State private var showingInvestmentAnalysis = false
+    @State private var showingPaywall = false
 
     private var settings: UserSettings? { settingsList.first }
     private var price: Double { Double(priceText.replacingOccurrences(of: ",", with: ".")) ?? 0 }
@@ -141,9 +143,12 @@ struct AddItemView: View {
 
                 if price > 0 {
                     Section("Bu parayı yatırsaydın?") {
-                        OpportunityCostRow(price: price, currencyCode: currencyCode, asset: .sp500)
-                        OpportunityCostRow(price: price, currencyCode: currencyCode, asset: .gold)
-                        Text("Geçmiş performans, gelecek için garanti değildir. Uzun vadeli ortalamalara dayalı kaba bir tahmindir.")
+                        Button {
+                            attemptShowInvestmentAnalysis()
+                        } label: {
+                            Label("Yatırım Analizini Gör", systemImage: "chart.xyaxis.line")
+                        }
+                        Text(investmentAnalysisFooter)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
@@ -195,7 +200,34 @@ struct AddItemView: View {
                     onCancel: {}
                 )
             }
+            .sheet(isPresented: $showingInvestmentAnalysis, onDismiss: markFreeAnalysisUsed) {
+                InvestmentAnalysisView(itemPrice: price, currencyCode: currencyCode)
+            }
+            .sheet(isPresented: $showingPaywall) { PaywallView() }
         }
+    }
+
+    private var investmentAnalysisFooter: String {
+        if storeService.isPremium {
+            return "Premium ile sınırsız yatırım analizi."
+        } else if settings?.hasUsedFreeInvestmentAnalysis == true {
+            return "Ücretsiz analiz hakkını kullandın — sınırsız erişim için Premium gerekir."
+        } else {
+            return "İlk analiz ücretsiz. Sonrasında Premium ile sınırsız kullanabilirsin."
+        }
+    }
+
+    private func attemptShowInvestmentAnalysis() {
+        if storeService.isPremium || settings?.hasUsedFreeInvestmentAnalysis != true {
+            showingInvestmentAnalysis = true
+        } else {
+            showingPaywall = true
+        }
+    }
+
+    private func markFreeAnalysisUsed() {
+        guard !storeService.isPremium else { return }
+        settings?.hasUsedFreeInvestmentAnalysis = true
     }
 
     private func fetchProductInfo() {
@@ -260,27 +292,5 @@ struct AddItemView: View {
         modelContext.insert(item)
         NotificationService.shared.scheduleReminder(for: item)
         dismiss()
-    }
-}
-
-private struct OpportunityCostRow: View {
-    let price: Double
-    let currencyCode: String
-    let asset: InvestmentAsset
-    private let years: Double = 3
-
-    private var projected: Double {
-        WageCalculator.projectedValue(principal: price, years: years, annualRate: asset.annualReturnRate)
-    }
-
-    var body: some View {
-        HStack {
-            Text(asset.displayName)
-                .font(.subheadline)
-            Spacer()
-            Text("3 yılda \(CurrencyFormatter.format(projected, currencyCode: currencyCode))")
-                .font(.subheadline.bold())
-                .foregroundStyle(.green)
-        }
     }
 }

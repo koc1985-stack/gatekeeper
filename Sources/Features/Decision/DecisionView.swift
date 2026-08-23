@@ -55,12 +55,12 @@ struct DecisionView: View {
 
                 if item.price > 0 {
                     VStack(spacing: 4) {
-                        Text("Bunun yerine 3 yıl S&P 500'e yatırsaydın")
+                        Text("Bunun yerine 3 yıl gram altına yatırsaydın")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                         Text(CurrencyFormatter.format(
-                            WageCalculator.projectedValue(principal: item.price, years: 3, annualRate: InvestmentAsset.sp500.annualReturnRate),
+                            TurkishInvestmentAsset.gramGold.projectedValue(of: item.price, afterYears: 3),
                             currencyCode: item.currencyCode
                         ))
                         .font(.headline)
