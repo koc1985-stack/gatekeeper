@@ -131,6 +131,16 @@ struct SettingsView: View {
                     }
                 }
 
+                if let settings, !storeService.isPremium, settings.hasUsedFreeInvestmentAnalysis {
+                    Section {
+                        Button("Ücretsiz Yatırım Analizi Hakkını Sıfırla") {
+                            settings.hasUsedFreeInvestmentAnalysis = false
+                        }
+                    } footer: {
+                        Text("Test amaçlı geçici bir araç: ücretsiz kullanıcıların bir kez gördüğü yatırım analizi hakkını tekrar açar. Premium satın alma çalışır hale gelince kaldırılabilir.")
+                    }
+                }
+
                 Section("Senkronizasyon") {
                     Label("iCloud ile otomatik senkronize edilir", systemImage: "icloud.fill")
                         .foregroundStyle(.secondary)
