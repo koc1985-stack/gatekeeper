@@ -129,21 +129,19 @@ struct InvestmentAnalysisView: View {
         }
     }
 
+    // Not: AreaMark bilerek kullanılmıyor. AreaMark'ın varsayılan dolgu tabanı 0'dır ve logaritmik
+    // bir eksende 0 tanımsızdır (log(0) yoktur) — bu ikisinin birlikte kullanılması Swift Charts'ta
+    // gerçek bir çökmeye yol açıyor. Bu yüzden sadece çizgi + nokta işaretleri kullanıyoruz.
     @ChartContentBuilder
     private var historicalMarks: some ChartContent {
         ForEach(series.historical) { point in
-            AreaMark(x: .value("Yıl", point.year), y: .value("Değer", point.value))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [accentColor.opacity(0.35), accentColor.opacity(0.02)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
             LineMark(x: .value("Yıl", point.year), y: .value("Değer", point.value))
                 .foregroundStyle(accentColor)
                 .lineStyle(StrokeStyle(lineWidth: 2.5))
                 .interpolationMethod(.catmullRom)
+            PointMark(x: .value("Yıl", point.year), y: .value("Değer", point.value))
+                .foregroundStyle(accentColor)
+                .symbolSize(24)
         }
     }
 
