@@ -25,6 +25,7 @@ struct AddItemView: View {
     @State private var isNeed: Bool?
     @State private var alreadyOwnsSimilar: Bool?
     @State private var trigger: PurchaseTrigger?
+    @State private var consideration: ConsiderationPeriod?
     @State private var showingInvestmentAnalysis = false
     @State private var showingPaywall = false
 
@@ -158,8 +159,10 @@ struct AddItemView: View {
                     isNeed: $isNeed,
                     alreadyOwnsSimilar: $alreadyOwnsSimilar,
                     trigger: $trigger,
+                    consideration: $consideration,
                     price: price,
-                    monthlyIncome: settings?.effectiveMonthlyIncome ?? 0
+                    monthlyIncome: settings?.effectiveMonthlyIncome ?? 0,
+                    mood: mood
                 )
 
                 Section("Şu an nasıl hissediyorsun?") {
@@ -287,7 +290,8 @@ struct AddItemView: View {
             sourceDomain: URL(string: productLink)?.host,
             isNeed: isNeed,
             alreadyOwnsSimilar: alreadyOwnsSimilar,
-            trigger: trigger
+            trigger: trigger,
+            consideration: consideration
         )
         modelContext.insert(item)
         NotificationService.shared.scheduleReminder(for: item)

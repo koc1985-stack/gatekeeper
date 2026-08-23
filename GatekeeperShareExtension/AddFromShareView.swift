@@ -13,6 +13,7 @@ struct AddFromShareView: View {
     @State private var isNeed: Bool?
     @State private var alreadyOwnsSimilar: Bool?
     @State private var trigger: PurchaseTrigger?
+    @State private var consideration: ConsiderationPeriod?
     @State private var isFetchingProductInfo = false
     @State private var monthlyIncome: Double = 0
     @State private var imageData: Data?
@@ -49,8 +50,10 @@ struct AddFromShareView: View {
                     isNeed: $isNeed,
                     alreadyOwnsSimilar: $alreadyOwnsSimilar,
                     trigger: $trigger,
+                    consideration: $consideration,
                     price: price,
-                    monthlyIncome: monthlyIncome
+                    monthlyIncome: monthlyIncome,
+                    mood: mood
                 )
 
                 Section("Şu an nasıl hissediyorsun?") {
@@ -119,7 +122,8 @@ struct AddFromShareView: View {
             sourceDomain: sourceURL.flatMap { URL(string: $0)?.host },
             isNeed: isNeed,
             alreadyOwnsSimilar: alreadyOwnsSimilar,
-            trigger: trigger
+            trigger: trigger,
+            consideration: consideration
         )
         context.insert(item)
         try? context.save()

@@ -8,8 +8,10 @@ struct YearValue: Identifiable, Hashable {
 }
 
 /// Türkiye'de yaygın yatırım araçları — gram/çeyrek altın, döviz (USD/EUR) ve BIST 100.
-/// Yıl sonu değerleri kamuya açık piyasa verilerine dayalı yaklaşık rakamlardır (eğitim amaçlı),
-/// canlı/gerçek zamanlı veri değildir ve yatırım tavsiyesi oluşturmaz.
+/// Yıl sonu değerleri kamuya açık piyasa verilerine dayalı yaklaşık rakamlardır (eğitim amaçlı).
+/// USD, EUR ve altın için en güncel nokta, mümkün olduğunda `LiveMarketDataService`'ten gelen
+/// gerçek zamanlı veriyle değiştirilir (bkz. `liveValue(from:)` ve `series(includingLive:)`) —
+/// BIST 100 için ücretsiz/güvenilir bir canlı kaynak bulunmadığından statik tahminde kalır.
 enum TurkishInvestmentAsset: String, CaseIterable, Identifiable, Hashable {
     case gramGold
     case quarterGold
@@ -36,6 +38,20 @@ enum TurkishInvestmentAsset: String, CaseIterable, Identifiable, Hashable {
         case .usd: return "dollarsign.circle.fill"
         case .eur: return "eurosign.circle.fill"
         case .bist100: return "chart.line.uptrend.xyaxis"
+        }
+    }
+
+    /// Bu asset'in `LiveMarketDataService.fetchSnapshot()` üzerinden canlı veri alıp alamayacağı.
+    var supportsLiveData: Bool { self != .bist100 }
+
+    /// Bir canlı piyasa anlık görüntüsünden bu aracın "şimdi" değerini türetir (varsa).
+    func liveValue(from snapshot: LiveMarketSnapshot) -> Double? {
+        switch self {
+        case .usd: return snapshot.usdTRY
+        case .eur: return snapshot.eurTRY
+        case .gramGold: return snapshot.gramGoldTRY
+        case .quarterGold: return snapshot.gramGoldTRY * 1.6
+        case .bist100: return nil
         }
     }
 
@@ -75,21 +91,38 @@ enum TurkishInvestmentAsset: String, CaseIterable, Identifiable, Hashable {
         raw.map { YearValue(year: $0.0, value: $0.1) }
     }
 
-    /// Geçmiş serinin ilk ve son noktasından türetilen bileşik yıllık büyüme oranı (CAGR).
-    var cagr: Double {
-        let series = historicalYearEndValues
+    /// Statik geçmiş seriyi, varsa canlı "şimdi" değeriyle uzatır/günceller — bugünün gerçek yılı
+    /// serinin son statik yılından ilerideyse yeni bir nokta eklenir, aynı yılsa üzerine yazılır.
+    /// Bu sayede CAGR hesabı gerçek, en güncel veriye dayanır; statik tahmine değil.
+    func series(includingLive liveValue: Double? = nil, asOf year: Int = Calendar.current.component(.year, from: .now)) -> [YearValue] {
+        var points = historicalYearEndValues
+        guard let liveValue, liveValue > 0, let lastYear = points.last?.year, year >= lastYear else {
+            return points
+        }
+        if year == lastYear {
+            points[points.count - 1] = YearValue(year: year, value: liveValue)
+        } else {
+            points.append(YearValue(year: year, value: liveValue))
+        }
+        return points
+    }
+
+    /// Serinin ilk ve son noktasından türetilen bileşik yıllık büyüme oranı (CAGR).
+    func cagr(includingLive liveValue: Double? = nil) -> Double {
+        let series = series(includingLive: liveValue)
         guard let first = series.first, let last = series.last, first.value > 0 else { return 0 }
         let years = Double(last.year - first.year)
         guard years > 0 else { return 0 }
         return pow(last.value / first.value, 1 / years) - 1
     }
 
-    /// Geçmiş veriyi ve bu geçmiş CAGR'a göre `forwardYears` kadar ileriye uzatılmış tahmini birlikte döner.
-    /// Tahmin noktaları grafikte kesikli çizgiyle ayrıştırılmak üzere ayrı bir dizi olarak verilir.
-    func projectedSeries(forwardYears: Int = 5) -> (historical: [YearValue], projected: [YearValue]) {
-        let historical = historicalYearEndValues
+    /// Geçmiş (canlı veriyle güncellenmiş) veriyi ve CAGR'a göre `forwardYears` kadar ileriye uzatılmış
+    /// tahmini birlikte döner. Tahmin noktaları grafikte kesikli çizgiyle ayrıştırılmak üzere ayrı bir
+    /// dizi olarak verilir.
+    func projectedSeries(includingLive liveValue: Double? = nil, forwardYears: Int = 5) -> (historical: [YearValue], projected: [YearValue]) {
+        let historical = series(includingLive: liveValue)
         guard let last = historical.last else { return (historical, []) }
-        let rate = cagr
+        let rate = cagr(includingLive: liveValue)
         var projected: [YearValue] = [last]
         for step in 1...forwardYears {
             projected.append(YearValue(year: last.year + step, value: last.value * pow(1 + rate, Double(step))))
@@ -97,8 +130,9 @@ enum TurkishInvestmentAsset: String, CaseIterable, Identifiable, Hashable {
         return (historical, projected)
     }
 
-    /// `amount` tutarının, bu aracın geçmiş CAGR'ı ile `years` yıl sonra tahmini değeri.
-    func projectedValue(of amount: Double, afterYears years: Double) -> Double {
-        WageCalculator.projectedValue(principal: amount, years: years, annualRate: cagr)
+    /// `amount` tutarının, bu aracın (varsa canlı veriyle güncellenmiş) CAGR'ı ile `years` yıl sonra
+    /// tahmini değeri.
+    func projectedValue(of amount: Double, afterYears years: Double, includingLive liveValue: Double? = nil) -> Double {
+        WageCalculator.projectedValue(principal: amount, years: years, annualRate: cagr(includingLive: liveValue))
     }
 }

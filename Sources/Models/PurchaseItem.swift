@@ -60,6 +60,24 @@ enum PurchaseTrigger: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// "Bunu ne zamandır istiyorsun?" — az önce görülen bir şey mi, yoksa üzerine düşünülmüş bir istek mi.
+/// En güçlü dürtüsellik sinyallerinden biri: düşünme süresi neredeyse sıfırsa risk yüksektir.
+enum ConsiderationPeriod: String, Codable, CaseIterable, Identifiable {
+    case justNow
+    case fewDays
+    case longTime
+
+    var id: String { rawValue }
+
+    var displayName: LocalizedStringResource {
+        switch self {
+        case .justNow: return "Az önce gördüm"
+        case .fewDays: return "Birkaç gündür düşünüyorum"
+        case .longTime: return "Uzun zamandır istiyorum"
+        }
+    }
+}
+
 enum PurchaseCategory: String, Codable, CaseIterable, Identifiable {
     case clothing
     case electronics
@@ -112,6 +130,7 @@ final class PurchaseItem {
     var isNeed: Bool?
     var alreadyOwnsSimilar: Bool?
     var triggerRaw: String?
+    var considerationRaw: String?
 
     init(
         name: String,
@@ -126,7 +145,8 @@ final class PurchaseItem {
         sourceDomain: String? = nil,
         isNeed: Bool? = nil,
         alreadyOwnsSimilar: Bool? = nil,
-        trigger: PurchaseTrigger? = nil
+        trigger: PurchaseTrigger? = nil,
+        consideration: ConsiderationPeriod? = nil
     ) {
         let now = Date.now
         self.id = UUID()
@@ -146,6 +166,7 @@ final class PurchaseItem {
         self.isNeed = isNeed
         self.alreadyOwnsSimilar = alreadyOwnsSimilar
         self.triggerRaw = trigger?.rawValue
+        self.considerationRaw = consideration?.rawValue
     }
 
     var category: PurchaseCategory {
@@ -181,5 +202,10 @@ final class PurchaseItem {
     var trigger: PurchaseTrigger? {
         get { triggerRaw.flatMap { PurchaseTrigger(rawValue: $0) } }
         set { triggerRaw = newValue?.rawValue }
+    }
+
+    var consideration: ConsiderationPeriod? {
+        get { considerationRaw.flatMap { ConsiderationPeriod(rawValue: $0) } }
+        set { considerationRaw = newValue?.rawValue }
     }
 }
