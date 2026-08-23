@@ -78,6 +78,25 @@ enum ConsiderationPeriod: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// "1 hafta sonra bu karardan memnun olur musun?" — beklenen pişmanlık (anticipated regret) sorusu.
+/// Davranışsal ekonomide, geleceğe kısa bir zihinsel sıçrama yaptırmak dürtüsel kararları en çok
+/// azaltan tekniklerden biridir; bu yüzden diğer sorulardan ayrı ve daha belirgin bir ağırlıkla ele alınır.
+enum FutureOutlook: String, Codable, CaseIterable, Identifiable {
+    case satisfied
+    case unsure
+    case regretLikely
+
+    var id: String { rawValue }
+
+    var displayName: LocalizedStringResource {
+        switch self {
+        case .satisfied: return "Evet, memnun olurum"
+        case .unsure: return "Emin değilim"
+        case .regretLikely: return "Muhtemelen pişman olurum"
+        }
+    }
+}
+
 enum PurchaseCategory: String, Codable, CaseIterable, Identifiable {
     case clothing
     case electronics
@@ -131,6 +150,7 @@ final class PurchaseItem {
     var alreadyOwnsSimilar: Bool?
     var triggerRaw: String?
     var considerationRaw: String?
+    var futureOutlookRaw: String?
 
     init(
         name: String,
@@ -146,7 +166,8 @@ final class PurchaseItem {
         isNeed: Bool? = nil,
         alreadyOwnsSimilar: Bool? = nil,
         trigger: PurchaseTrigger? = nil,
-        consideration: ConsiderationPeriod? = nil
+        consideration: ConsiderationPeriod? = nil,
+        futureOutlook: FutureOutlook? = nil
     ) {
         let now = Date.now
         self.id = UUID()
@@ -167,6 +188,7 @@ final class PurchaseItem {
         self.alreadyOwnsSimilar = alreadyOwnsSimilar
         self.triggerRaw = trigger?.rawValue
         self.considerationRaw = consideration?.rawValue
+        self.futureOutlookRaw = futureOutlook?.rawValue
     }
 
     var category: PurchaseCategory {
@@ -207,5 +229,10 @@ final class PurchaseItem {
     var consideration: ConsiderationPeriod? {
         get { considerationRaw.flatMap { ConsiderationPeriod(rawValue: $0) } }
         set { considerationRaw = newValue?.rawValue }
+    }
+
+    var futureOutlook: FutureOutlook? {
+        get { futureOutlookRaw.flatMap { FutureOutlook(rawValue: $0) } }
+        set { futureOutlookRaw = newValue?.rawValue }
     }
 }

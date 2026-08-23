@@ -7,6 +7,17 @@ struct YearValue: Identifiable, Hashable {
     var id: Int { year }
 }
 
+/// A single forward-projected year, carrying a central (most likely) estimate plus an
+/// optimistic/pessimistic band derived from the asset's own historical volatility — shown as a
+/// shaded "confidence cone" instead of one falsely-precise line.
+struct ProjectedYearValue: Identifiable, Hashable {
+    let year: Int
+    let expected: Double
+    let optimistic: Double
+    let pessimistic: Double
+    var id: Int { year }
+}
+
 /// Türkiye'de yaygın yatırım araçları — gram/çeyrek altın, döviz (USD/EUR) ve BIST 100.
 /// Yıl sonu değerleri kamuya açık piyasa verilerine dayalı yaklaşık rakamlardır (eğitim amaçlı).
 /// USD, EUR ve altın için en güncel nokta, mümkün olduğunda `LiveMarketDataService`'ten gelen
@@ -116,23 +127,73 @@ enum TurkishInvestmentAsset: String, CaseIterable, Identifiable, Hashable {
         return pow(last.value / first.value, 1 / years) - 1
     }
 
-    /// Geçmiş (canlı veriyle güncellenmiş) veriyi ve CAGR'a göre `forwardYears` kadar ileriye uzatılmış
-    /// tahmini birlikte döner. Tahmin noktaları grafikte kesikli çizgiyle ayrıştırılmak üzere ayrı bir
-    /// dizi olarak verilir.
-    func projectedSeries(includingLive liveValue: Double? = nil, forwardYears: Int = 5) -> (historical: [YearValue], projected: [YearValue]) {
+    /// Bu varlığın son 10 yılındaki yıldan yıla değişim oranlarının örneklem standart sapması —
+    /// tahmin bandının genişliğini (belirsizliği) buradan türetiyoruz.
+    private func yearOverYearVolatility(includingLive liveValue: Double? = nil) -> Double {
+        let points = series(includingLive: liveValue)
+        guard points.count > 2 else { return 0 }
+        let rates = zip(points, points.dropFirst()).map { $1.value / $0.value - 1 }
+        let mean = rates.reduce(0, +) / Double(rates.count)
+        let variance = rates.reduce(0) { $0 + ($1 - mean) * ($1 - mean) } / Double(rates.count - 1)
+        return variance.squareRoot()
+    }
+
+    /// Uzun vadede bu tür TRY cinsi varlıkların (döviz kaynaklı devalüasyon + emtia/hisse getirisi)
+    /// makul sayılabilecek "durağan durum" büyüme varsayımı. Son 10 yılın aşırı yüksek CAGR'ı
+    /// (ör. %40+) hiçbir zaman değişmeden 5 yıl daha sürecekmiş gibi düz bir çizgiyle uzatmak yerine,
+    /// bu değere doğru kademeli olarak yavaşlatıyoruz.
+    private static let steadyStateRate = 0.20
+    /// Her adımda geçmiş CAGR ile durağan durum arasındaki farkın ne kadarının "eridiğini" belirler.
+    private static let dampingFactor = 0.72
+
+    /// Geçmiş (canlı veriyle güncellenmiş) veriyi ve "sönümlenen trend" (damped trend) yöntemiyle
+    /// hesaplanan `forwardYears` kadar ileriye dönük tahmini — merkezi tahmin + olası aralıkla (fan
+    /// chart) birlikte — döner. Sabit bir oranı olduğu gibi uzatmak yerine, her adımda büyüme oranı
+    /// kademeli olarak `steadyStateRate`'e yaklaşır; bu hem grafikte gerçekçi bir eğri oluşturur hem
+    /// de aşırı yüksek/düşük geçmiş oranların sonsuza dek süreceği gibi kaba bir varsayımdan kaçınır.
+    func projectedSeries(includingLive liveValue: Double? = nil, forwardYears: Int = 5) -> (historical: [YearValue], projected: [ProjectedYearValue]) {
         let historical = series(includingLive: liveValue)
         guard let last = historical.last else { return (historical, []) }
-        let rate = cagr(includingLive: liveValue)
-        var projected: [YearValue] = [last]
+
+        let baseRate = cagr(includingLive: liveValue)
+        let volatility = yearOverYearVolatility(includingLive: liveValue)
+
+        var expected = last.value
+        var optimistic = last.value
+        var pessimistic = last.value
+        var projected: [ProjectedYearValue] = []
+
         for step in 1...forwardYears {
-            projected.append(YearValue(year: last.year + step, value: last.value * pow(1 + rate, Double(step))))
+            let decay = pow(Self.dampingFactor, Double(step))
+            let rate = Self.steadyStateRate + (baseRate - Self.steadyStateRate) * decay
+            let band = volatility * decay * 0.5
+
+            expected *= (1 + rate)
+            optimistic *= (1 + max(rate + band, -0.9))
+            pessimistic *= (1 + max(rate - band, -0.9))
+
+            projected.append(ProjectedYearValue(
+                year: last.year + step,
+                expected: expected,
+                optimistic: max(optimistic, expected),
+                pessimistic: min(max(pessimistic, 0.01), expected)
+            ))
         }
+
         return (historical, projected)
     }
 
-    /// `amount` tutarının, bu aracın (varsa canlı veriyle güncellenmiş) CAGR'ı ile `years` yıl sonra
-    /// tahmini değeri.
-    func projectedValue(of amount: Double, afterYears years: Double, includingLive liveValue: Double? = nil) -> Double {
-        WageCalculator.projectedValue(principal: amount, years: years, annualRate: cagr(includingLive: liveValue))
+    /// `amount` tutarının, sönümlenen trend yöntemiyle `years` yıl sonra tahmini (merkezi) değeri —
+    /// grafikte gösterilen "beklenen" çizgiyle aynı yöntemi kullanır.
+    func projectedValue(of amount: Double, afterYears years: Int, includingLive liveValue: Double? = nil) -> Double {
+        guard years > 0 else { return amount }
+        let baseRate = cagr(includingLive: liveValue)
+        var value = amount
+        for step in 1...years {
+            let decay = pow(Self.dampingFactor, Double(step))
+            let rate = Self.steadyStateRate + (baseRate - Self.steadyStateRate) * decay
+            value *= (1 + rate)
+        }
+        return value
     }
 }

@@ -3,9 +3,9 @@ import Foundation
 import SwiftUI
 
 /// Türkiye'de yaygın yatırım araçlarının (gram/çeyrek altın, dolar, euro, BIST 100) son 10 yıllık
-/// gerçek trendini, mümkün olduğunda canlı güncel değerle birleştirilmiş halde, ve bu trende dayalı
-/// 5 yıllık projeksiyonunu tek bir eğri üzerinde gösterir. Premium olmayan kullanıcılar bu ekranı bir
-/// kez ücretsiz görebilir (gate mantığı çağıran view'da uygulanır).
+/// gerçek trendini, mümkün olduğunda canlı güncel değerle birleştirilmiş halde, ve "sönümlenen
+/// trend" yöntemiyle hesaplanan 5 yıllık tahmini (merkezi çizgi + olası aralık) gösterir. Premium
+/// olmayan kullanıcılar bu ekranı bir kez ücretsiz görebilir (gate mantığı çağıran view'da uygulanır).
 struct InvestmentAnalysisView: View {
     let itemPrice: Double
     let currencyCode: String
@@ -20,7 +20,7 @@ struct InvestmentAnalysisView: View {
         return selectedAsset.liveValue(from: liveSnapshot)
     }
 
-    private var series: (historical: [YearValue], projected: [YearValue]) {
+    private var series: (historical: [YearValue], projected: [ProjectedYearValue]) {
         selectedAsset.projectedSeries(includingLive: liveValue)
     }
 
@@ -51,8 +51,9 @@ struct InvestmentAnalysisView: View {
                     assetPicker
                     headerCard
                     chartSection
+                    chartLegend
                     summarySection
-                    Text("Değerler geçmiş yıl sonu piyasa verilerine dayalı yaklaşık rakamlardır; dolar, euro ve altın için mümkün olduğunda güncel piyasa değeri kullanılır. Gelecek tahmini, son 10 yılın ortalama yıllık değişiminin aynı şekilde devam ettiği varsayımına dayanır — yatırım tavsiyesi değildir, geçmiş performans gelecek için garanti oluşturmaz.")
+                    Text("Değerler geçmiş yıl sonu piyasa verilerine dayalı yaklaşık rakamlardır; dolar, euro ve altın için mümkün olduğunda güncel piyasa değeri kullanılır. Gelecek tahmini \"sönümlenen trend\" yöntemiyle hesaplanır: son 10 yılın ortalama değişimi, aşırı uçlarda sonsuza dek sürmeyip kademeli olarak daha ölçülü bir uzun vadeli varsayıma yaklaşır; gölgeli alan bu tahminin ne kadar belirsiz olduğunu gösterir. Yatırım tavsiyesi değildir, geçmiş performans gelecek için garanti oluşturmaz.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -138,9 +139,10 @@ struct InvestmentAnalysisView: View {
         }
     }
 
-    // Not: AreaMark bilerek kullanılmıyor. AreaMark'ın varsayılan dolgu tabanı 0'dır ve logaritmik
-    // bir eksende 0 tanımsızdır (log(0) yoktur) — bu ikisinin birlikte kullanılması Swift Charts'ta
-    // gerçek bir çökmeye yol açıyor. Bu yüzden sadece çizgi + nokta işaretleri kullanıyoruz.
+    // Not: AreaMark'ın tek-y formu (y:) bilerek kullanılmıyor — varsayılan dolgu tabanı 0'dır ve
+    // logaritmik eksende 0 tanımsızdır, bu da Swift Charts'ta gerçek bir çökmeye yol açıyor.
+    // Olası aralık için iki-y formunu (yStart/yEnd) kullanıyoruz; ikisi de her zaman pozitif
+    // olduğundan log ölçekle güvenle çalışır.
     @ChartContentBuilder
     private var historicalMarks: some ChartContent {
         ForEach(series.historical) { point in
@@ -155,10 +157,23 @@ struct InvestmentAnalysisView: View {
     }
 
     @ChartContentBuilder
-    private var projectedMarks: some ChartContent {
+    private var confidenceBandMarks: some ChartContent {
         ForEach(series.projected) { point in
-            LineMark(x: .value("Yıl", point.year), y: .value("Değer", point.value))
-                .foregroundStyle(accentColor.opacity(0.55))
+            AreaMark(
+                x: .value("Yıl", point.year),
+                yStart: .value("Alt", point.pessimistic),
+                yEnd: .value("Üst", point.optimistic)
+            )
+            .foregroundStyle(accentColor.opacity(0.15))
+            .interpolationMethod(.catmullRom)
+        }
+    }
+
+    @ChartContentBuilder
+    private var expectedProjectionMarks: some ChartContent {
+        ForEach(series.projected) { point in
+            LineMark(x: .value("Yıl", point.year), y: .value("Değer", point.expected))
+                .foregroundStyle(accentColor.opacity(0.85))
                 .lineStyle(StrokeStyle(lineWidth: 2.5, dash: [6, 5]))
                 .interpolationMethod(.catmullRom)
         }
@@ -181,7 +196,8 @@ struct InvestmentAnalysisView: View {
     private var chartSection: some View {
         Chart {
             historicalMarks
-            projectedMarks
+            confidenceBandMarks
+            expectedProjectionMarks
             todayRuleMark
         }
         // Logaritmik ölçek: TRY cinsinden bu araçların 10 yıllık büyümesi kat kat (bazen 10x+)
@@ -189,8 +205,39 @@ struct InvestmentAnalysisView: View {
         // gösterir. Log ölçek, her yıldaki oransal değişimi de doğru şekilde okunabilir kılar.
         .chartXScale(domain: xDomain)
         .chartYScale(type: .log)
+        .chartXAxis {
+            // Varsayılan sayı biçimlendirici Türkçe yerelde yılları "2.026" gibi binlik ayraçla
+            // gösteriyordu — Int'i doğrudan String'e çevirip bu ayracı devre dışı bırakıyoruz.
+            AxisMarks(values: .automatic(desiredCount: 6)) { value in
+                AxisGridLine()
+                if let year = value.as(Int.self) {
+                    AxisValueLabel { Text(String(year)) }
+                }
+            }
+        }
         .chartLegend(.hidden)
         .frame(height: 240)
+    }
+
+    private var chartLegend: some View {
+        HStack(spacing: 16) {
+            legendItem(color: accentColor, label: "Geçmiş (gerçek)")
+            legendItem(color: accentColor.opacity(0.85), label: "Beklenen tahmin", dashed: true)
+            legendItem(color: accentColor.opacity(0.25), label: "Olası aralık", isSwatch: true)
+        }
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+    }
+
+    private func legendItem(color: Color, label: String, dashed: Bool = false, isSwatch: Bool = false) -> some View {
+        HStack(spacing: 4) {
+            if isSwatch {
+                RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 14, height: 10)
+            } else {
+                Rectangle().fill(color).frame(width: 14, height: dashed ? 2 : 2.5)
+            }
+            Text(label)
+        }
     }
 
     private var summarySection: some View {
@@ -221,6 +268,13 @@ struct InvestmentAnalysisView: View {
                 ))
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundStyle(.green)
+
+                if let lastBand = series.projected.last {
+                    let scale = itemPrice / (series.historical.last?.value ?? itemPrice)
+                    Text("Olası aralık: \(CurrencyFormatter.format(lastBand.pessimistic * scale, currencyCode: currencyCode)) – \(CurrencyFormatter.format(lastBand.optimistic * scale, currencyCode: currencyCode))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding(18)

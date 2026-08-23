@@ -26,6 +26,7 @@ struct AddItemView: View {
     @State private var alreadyOwnsSimilar: Bool?
     @State private var trigger: PurchaseTrigger?
     @State private var consideration: ConsiderationPeriod?
+    @State private var futureOutlook: FutureOutlook?
     @State private var showingInvestmentAnalysis = false
     @State private var showingPaywall = false
 
@@ -160,6 +161,7 @@ struct AddItemView: View {
                     alreadyOwnsSimilar: $alreadyOwnsSimilar,
                     trigger: $trigger,
                     consideration: $consideration,
+                    futureOutlook: $futureOutlook,
                     price: price,
                     monthlyIncome: settings?.effectiveMonthlyIncome ?? 0,
                     mood: mood
@@ -291,7 +293,8 @@ struct AddItemView: View {
             isNeed: isNeed,
             alreadyOwnsSimilar: alreadyOwnsSimilar,
             trigger: trigger,
-            consideration: consideration
+            consideration: consideration,
+            futureOutlook: futureOutlook
         )
         modelContext.insert(item)
         NotificationService.shared.scheduleReminder(for: item)

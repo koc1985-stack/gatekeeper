@@ -14,6 +14,7 @@ struct AddFromShareView: View {
     @State private var alreadyOwnsSimilar: Bool?
     @State private var trigger: PurchaseTrigger?
     @State private var consideration: ConsiderationPeriod?
+    @State private var futureOutlook: FutureOutlook?
     @State private var isFetchingProductInfo = false
     @State private var monthlyIncome: Double = 0
     @State private var imageData: Data?
@@ -51,6 +52,7 @@ struct AddFromShareView: View {
                     alreadyOwnsSimilar: $alreadyOwnsSimilar,
                     trigger: $trigger,
                     consideration: $consideration,
+                    futureOutlook: $futureOutlook,
                     price: price,
                     monthlyIncome: monthlyIncome,
                     mood: mood
@@ -123,7 +125,8 @@ struct AddFromShareView: View {
             isNeed: isNeed,
             alreadyOwnsSimilar: alreadyOwnsSimilar,
             trigger: trigger,
-            consideration: consideration
+            consideration: consideration,
+            futureOutlook: futureOutlook
         )
         context.insert(item)
         try? context.save()

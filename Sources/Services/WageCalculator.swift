@@ -12,12 +12,6 @@ enum WageCalculator {
         return price / hourlyWage
     }
 
-    /// Compound growth projection: what `principal` could become after `years` at `annualRate`.
-    static func projectedValue(principal: Double, years: Double, annualRate: Double) -> Double {
-        guard principal > 0, years > 0 else { return principal }
-        return principal * pow(1 + annualRate, years)
-    }
-
     /// Formats a duration of work as a short localized phrase, e.g. "35 dakika", "6.5 saat", "3 gün".
     static func formattedHours(_ hours: Double) -> String {
         guard hours > 0 else {
