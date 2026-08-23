@@ -48,13 +48,12 @@ targets:
         # Google Sign-In: OAuth client ID from Google Cloud Console for this bundle ID
         # (com.impulsegatekeeper.app) — until a real one is set, GoogleSignInSupport.isConfigured
         # keeps the Google sign-in button hidden instead of failing when tapped.
-        GIDClientID: "REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+        GIDClientID: "1064114041245-nkchja12aulhnbqh9qnsa77ol3mlufa7.apps.googleusercontent.com"
         CFBundleURLTypes:
           - CFBundleURLSchemes:
-              - "com.googleusercontent.apps.REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID"
-        # AdMob: Google's public TEST App ID — swap for DurBi's real App ID once it's
-        # registered at admob.google.com (must match AdsSupport.bannerAdUnitID's account).
-        GADApplicationIdentifier: "ca-app-pub-3940256099942544~1458002511"
+              - "com.googleusercontent.apps.1064114041245-nkchja12aulhnbqh9qnsa77ol3mlufa7"
+        # Real DurBi AdMob App ID (admob.google.com) — must match AdsSupport.bannerAdUnitID's account.
+        GADApplicationIdentifier: "ca-app-pub-7881130184412841~6318128736"
         NSUserTrackingUsageDescription: "Sana daha uygun reklamlar gösterebilmemiz için bu izne ihtiyacımız var. İzin vermesen de uygulamayı sorunsuz kullanmaya devam edebilirsin."
         SKAdNetworkItems:
           - SKAdNetworkIdentifier: "cstr6suwn9.skadnetwork"

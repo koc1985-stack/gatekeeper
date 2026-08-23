@@ -6,9 +6,8 @@ import UIKit
 /// the app keeps working fine — AdMob automatically falls back to non-personalized ads, that's
 /// not an error condition we need to handle specially.
 enum AdsSupport {
-    /// Google's public test ad unit ID — safe to ship before a real AdMob app/ad-unit exists.
-    /// Swap for the real banner ad unit ID once DurBi is registered at admob.google.com.
-    static let bannerAdUnitID = "ca-app-pub-3940256099942544/2934735716"
+    /// Real DurBi banner ad unit (admob.google.com → DurBi → Ad units → Home Banner).
+    static let bannerAdUnitID = "ca-app-pub-7881130184412841/1800299223"
 
     /// Called once at app launch (see ImpulseGatekeeperApp.init).
     static func startMobileAds() {
