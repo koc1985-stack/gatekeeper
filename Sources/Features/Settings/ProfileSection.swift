@@ -9,6 +9,7 @@ struct ProfileSection: View {
     @State private var authState = AuthState.shared
     @State private var isSigningIn = false
     @State private var errorMessage: String?
+    @State private var showingDeleteConfirmation = false
 
     var body: some View {
         Section("Profil") {
@@ -24,6 +25,9 @@ struct ProfileSection: View {
                 }
                 Button("Çıkış Yap", role: .destructive) {
                     authState.signOut()
+                }
+                Button("Hesabımı Sil", role: .destructive) {
+                    showingDeleteConfirmation = true
                 }
             } else {
                 if isSigningIn {
@@ -59,6 +63,19 @@ struct ProfileSection: View {
                 }
             }
         }
+        .alert("Hesabını Sil", isPresented: $showingDeleteConfirmation) {
+            Button("Vazgeç", role: .cancel) {}
+            Button("Hesabı Sil", role: .destructive) { deleteAccount() }
+        } message: {
+            Text("Bu işlem, cihazına kaydedilmiş profil bilgilerini (ad, e-posta) kalıcı ve geri alınamaz şekilde siler. DurBi'de bu bilgiler zaten sadece cihazında tutulur; hiçbir sunucuya gönderilmez.")
+        }
+    }
+
+    private func deleteAccount() {
+        if authState.provider == "google" {
+            GIDSignIn.sharedInstance.disconnect { _ in }
+        }
+        authState.deleteAccount()
     }
 
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {

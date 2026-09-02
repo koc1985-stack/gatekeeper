@@ -35,6 +35,19 @@ final class AuthState {
     }
 
     func signOut() {
+        clearLocalProfile()
+    }
+
+    /// Apple App Review Guideline 5.1.1(v): an app that supports account creation must offer
+    /// account deletion, not just sign-out/deactivation. DurBi has no backend account — the
+    /// Apple/Google sign-in above only ever wrote this locally-cached name/email/provider — so
+    /// deleting it here, immediately and permanently, IS the complete account deletion; there is
+    /// no server-side record left behind anywhere.
+    func deleteAccount() {
+        clearLocalProfile()
+    }
+
+    private func clearLocalProfile() {
         provider = nil
         displayName = nil
         email = nil
